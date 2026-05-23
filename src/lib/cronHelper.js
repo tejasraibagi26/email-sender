@@ -70,7 +70,7 @@ export function toCronExpression(input) {
 
 export function computeNextRun(cronExpression) {
   try {
-    const interval = cronParser.parseExpression(cronExpression);
+    const interval = cronParser.parseExpression(cronExpression, { utc: true });
     return interval.next().toISOString();
   } catch {
     return null;

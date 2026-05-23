@@ -24,7 +24,7 @@ const transporter = nodemailer.createTransport({
 
 function computeNextRun(cronExpression) {
   try {
-    return cronParser.parseExpression(cronExpression).next().toISOString();
+    return cronParser.parseExpression(cronExpression, { utc: true }).next().toISOString();
   } catch {
     return null;
   }
