@@ -66,7 +66,7 @@ export default async function handler(req, res) {
     jobs.map(async (job) => {
       try {
         await transporter.sendMail({
-          from: `"Email Service" <${process.env.GMAIL_USER}>`,
+          from: `"${job.app_name ?? 'Email Service'}" <${process.env.GMAIL_USER}>`,
           to: job.recipient,
           subject: job.subject,
           html: job.body_html ?? undefined,
