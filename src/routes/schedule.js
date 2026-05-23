@@ -12,13 +12,14 @@ const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/
 // POST /schedule — create a scheduled job
 router.post('/', requireApiKey, async (req, res, next) => {
   try {
-    const { name, appName, to, subject, html, body_text, text, cronExpression, frequency, time, day } = req.body;
+    const { name, appName, to, subject, html, body_text, text, cronExpression, frequency, time, day, metadata } = req.body;
 
     if (!name) return res.status(400).json({ error: 'name is required', code: 'VALIDATION_ERROR' });
     if (!appName) return res.status(400).json({ error: 'appName is required', code: 'VALIDATION_ERROR' });
     if (!to || !EMAIL_RE.test(to)) return res.status(400).json({ error: 'Valid recipient email is required', code: 'VALIDATION_ERROR' });
     if (!subject) return res.status(400).json({ error: 'subject is required', code: 'VALIDATION_ERROR' });
-    if (!html && !text && !body_text) return res.status(400).json({ error: 'At least one of html or text is required', code: 'VALIDATION_ERROR' });
+    const isDigest = metadata?.type === 'digest';
+    if (!isDigest && !html && !text && !body_text) return res.status(400).json({ error: 'At least one of html or text is required', code: 'VALIDATION_ERROR' });
 
     const bodyText = text || body_text;
 
@@ -45,6 +46,7 @@ router.post('/', requireApiKey, async (req, res, next) => {
         body_text: bodyText || null,
         cron_expression: resolvedCron,
         next_run_at: nextRunAt,
+        metadata: metadata ?? null,
       })
       .select()
       .single();

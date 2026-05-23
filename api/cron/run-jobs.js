@@ -65,13 +65,30 @@ export default async function handler(req, res) {
   const results = await Promise.allSettled(
     jobs.map(async (job) => {
       try {
-        await transporter.sendMail({
-          from: `"${job.app_name ?? 'Email Service'}" <${process.env.GMAIL_USER}>`,
-          to: job.recipient,
-          subject: job.subject,
-          html: job.body_html ?? undefined,
-          text: job.body_text ?? undefined,
-        });
+        if (job.metadata?.type === 'digest') {
+          const digestUrl = job.metadata.digestUrl
+            ?? `${process.env.MARKET_ANALYTICS_URL}/api/email-digest`;
+          const symbols = job.metadata.symbols ?? [];
+
+          const digestRes = await fetch(digestUrl, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ to: job.recipient, symbols }),
+          });
+
+          if (!digestRes.ok) {
+            const body = await digestRes.json().catch(() => ({}));
+            throw new Error(body.error ?? `Digest endpoint returned ${digestRes.status}`);
+          }
+        } else {
+          await transporter.sendMail({
+            from: `"${job.app_name ?? 'Email Service'}" <${process.env.GMAIL_USER}>`,
+            to: job.recipient,
+            subject: job.subject,
+            html: job.body_html ?? undefined,
+            text: job.body_text ?? undefined,
+          });
+        }
 
         await supabase.from('email_logs').insert({
           job_id: job.id,
