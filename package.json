@@ -10,6 +10,7 @@
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.105.3",
+    "@upstash/qstash": "^2.11.0",
     "cron-parser": "^4.9.0",
     "dotenv": "^16.4.5",
     "express": "^4.19.2",

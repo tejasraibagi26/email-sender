@@ -1,6 +1,12 @@
+import { Receiver } from '@upstash/qstash';
 import { createClient } from '@supabase/supabase-js';
 import nodemailer from 'nodemailer';
 import cronParser from 'cron-parser';
+
+const receiver = new Receiver({
+  currentSigningKey: process.env.QSTASH_CURRENT_SIGNING_KEY,
+  nextSigningKey: process.env.QSTASH_NEXT_SIGNING_KEY,
+});
 
 const supabase = createClient(
   process.env.SUPABASE_URL,
@@ -25,7 +31,21 @@ function computeNextRun(cronExpression) {
 }
 
 export default async function handler(req, res) {
-  if (req.headers.authorization !== `Bearer ${process.env.CRON_SECRET}`) {
+  // Read raw body for signature verification
+  const rawBody = await new Promise((resolve) => {
+    let data = '';
+    req.on('data', (chunk) => (data += chunk));
+    req.on('end', () => resolve(data));
+  });
+
+  const signature = req.headers['upstash-signature'];
+  const isValid = await receiver.verify({
+    signature,
+    body: rawBody,
+    url: `https://${req.headers.host}${req.url}`,
+  }).catch(() => false);
+
+  if (!isValid) {
     return res.status(401).json({ error: 'Unauthorized' });
   }
 
