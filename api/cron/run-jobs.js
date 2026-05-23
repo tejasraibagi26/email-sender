@@ -70,16 +70,26 @@ export default async function handler(req, res) {
             ?? `${process.env.MARKET_ANALYTICS_URL}/api/email-digest`;
           const symbols = job.metadata.symbols ?? [];
 
+          // Pass dryRun=true so the digest endpoint returns html+subject without
+          // trying to call back into the email service to send (circular loop).
           const digestRes = await fetch(digestUrl, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ to: job.recipient, symbols }),
+            body: JSON.stringify({ to: job.recipient, symbols, dryRun: true }),
           });
 
           if (!digestRes.ok) {
             const body = await digestRes.json().catch(() => ({}));
             throw new Error(body.error ?? `Digest endpoint returned ${digestRes.status}`);
           }
+
+          const { subject, html } = await digestRes.json();
+          await transporter.sendMail({
+            from: `"Market Analytics" <${process.env.GMAIL_USER}>`,
+            to: job.recipient,
+            subject,
+            html,
+          });
         } else {
           await transporter.sendMail({
             from: `"${job.app_name ?? 'Email Service'}" <${process.env.GMAIL_USER}>`,
