@@ -64,11 +64,15 @@ export default async function handler(req, res) {
 
   const results = await Promise.allSettled(
     jobs.map(async (job) => {
+      console.log(`[job:${job.id}] Starting — type: ${job.metadata?.type ?? 'standard'}, recipient: ${job.recipient}`);
       try {
         if (job.metadata?.type === 'digest') {
           const digestUrl = job.metadata.digestUrl
             ?? `${process.env.MARKET_ANALYTICS_URL}/api/email-digest`;
           const symbols = job.metadata.symbols ?? [];
+
+          console.log(`[job:${job.id}] Calling digest endpoint: ${digestUrl}`);
+          console.log(`[job:${job.id}] Symbols: ${symbols.join(', ')}`);
 
           // Pass dryRun=true so the digest endpoint returns html+subject without
           // trying to call back into the email service to send (circular loop).
@@ -78,18 +82,23 @@ export default async function handler(req, res) {
             body: JSON.stringify({ to: job.recipient, symbols, dryRun: true }),
           });
 
+          console.log(`[job:${job.id}] Digest endpoint responded: ${digestRes.status}`);
+
           if (!digestRes.ok) {
             const body = await digestRes.json().catch(() => ({}));
             throw new Error(body.error ?? `Digest endpoint returned ${digestRes.status}`);
           }
 
           const { subject, html } = await digestRes.json();
+          console.log(`[job:${job.id}] Got digest — subject: "${subject}", html length: ${html?.length ?? 0}`);
+
           await transporter.sendMail({
             from: `"Market Analytics" <${process.env.GMAIL_USER}>`,
             to: job.recipient,
             subject,
             html,
           });
+          console.log(`[job:${job.id}] Email sent to ${job.recipient}`);
         } else {
           await transporter.sendMail({
             from: `"${job.app_name ?? 'Email Service'}" <${process.env.GMAIL_USER}>`,
@@ -98,6 +107,7 @@ export default async function handler(req, res) {
             html: job.body_html ?? undefined,
             text: job.body_text ?? undefined,
           });
+          console.log(`[job:${job.id}] Standard email sent to ${job.recipient}`);
         }
 
         await supabase.from('email_logs').insert({
@@ -107,14 +117,18 @@ export default async function handler(req, res) {
           status: 'sent',
         });
 
+        const nextRun = computeNextRun(job.cron_expression);
+        console.log(`[job:${job.id}] Next run scheduled: ${nextRun}`);
+
         await supabase
           .from('email_jobs')
           .update({
             last_run_at: now,
-            next_run_at: computeNextRun(job.cron_expression),
+            next_run_at: nextRun,
           })
           .eq('id', job.id);
       } catch (err) {
+        console.error(`[job:${job.id}] Failed: ${err.message}`);
         await supabase.from('email_logs').insert({
           job_id: job.id,
           recipient: job.recipient,
