@@ -7,8 +7,7 @@ import scheduleRouter from './routes/schedule.js';
 
 const REQUIRED_ENV = [
   'API_KEY',
-  'GMAIL_USER',
-  'GMAIL_APP_PASSWORD',
+  'RESEND_API_KEY',
   'SUPABASE_URL',
   'SUPABASE_SERVICE_ROLE_KEY',
 ];

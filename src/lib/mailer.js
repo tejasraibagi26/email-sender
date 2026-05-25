@@ -1,18 +1,26 @@
-import nodemailer from 'nodemailer';
+import { Resend } from 'resend';
 import supabase from './supabase.js';
 
-const transporter = nodemailer.createTransport({
-  service: 'gmail',
-  auth: {
-    user: process.env.GMAIL_USER,
-    pass: process.env.GMAIL_APP_PASSWORD,
-  },
-});
+const resend = new Resend(process.env.RESEND_API_KEY);
 
-export async function sendEmail({ to, subject, html, text, jobId = null }) {
+const DOMAIN = 'mail.useuplift.live';
+
+const FROM_MAP = {
+  invite: `Uplift Invites <invite@${DOMAIN}>`,
+  notification: `Uplift <notifications@${DOMAIN}>`,
+  alert: `Uplift Alerts <alerts@${DOMAIN}>`,
+};
+
+const DEFAULT_FROM = `Uplift <noreply@${DOMAIN}>`;
+
+function resolveFrom(type) {
+  return (type && FROM_MAP[type]) || DEFAULT_FROM;
+}
+
+export async function sendEmail({ to, subject, html, text, type = null, jobId = null }) {
   try {
-    await transporter.sendMail({
-      from: `"Email Service" <${process.env.GMAIL_USER}>`,
+    await resend.emails.send({
+      from: resolveFrom(type),
       to,
       subject,
       html,
