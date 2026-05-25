@@ -56,10 +56,16 @@ export default async function handler(req, res) {
   );
 
   try {
-    await resend.emails.send({ from, to, subject, html, text });
+    const result = await resend.emails.send({ from, to, subject, html, text });
+    console.log('[send] resend result:', JSON.stringify(result));
+    if (result.error) {
+      await supabase.from('email_logs').insert({ job_id: null, recipient: to, subject, status: 'failed', error: result.error.message });
+      return res.status(502).json({ error: result.error.message, code: 'SEND_FAILED' });
+    }
     await supabase.from('email_logs').insert({ job_id: null, recipient: to, subject, status: 'sent' });
     return res.status(200).json({ success: true, data: { message: 'Email sent', recipient: to } });
   } catch (err) {
+    console.error('[send] error:', err.message);
     await supabase.from('email_logs').insert({ job_id: null, recipient: to, subject, status: 'failed', error: err.message });
     return res.status(502).json({ error: err.message, code: 'SEND_FAILED' });
   }
