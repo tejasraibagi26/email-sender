@@ -4,23 +4,27 @@ import supabase from './supabase.js';
 const resend = new Resend(process.env.RESEND_API_KEY);
 
 const DOMAIN = 'mails.useuplift.live';
+const DEFAULT_APP = 'Uplift';
 
-const FROM_MAP = {
-  invite: `Uplift Invites <invite@${DOMAIN}>`,
-  notification: `Uplift <notifications@${DOMAIN}>`,
-  alert: `Uplift Alerts <alerts@${DOMAIN}>`,
+const TYPE_MAP = {
+  invite:       { label: 'Invites',      address: 'invite' },
+  notification: { label: null,           address: 'notifications' },
+  alert:        { label: 'Alerts',       address: 'alerts' },
+  digest:       { label: 'Digest',       address: 'digest' },
 };
 
-const DEFAULT_FROM = `Uplift <noreply@${DOMAIN}>`;
-
-function resolveFrom(type) {
-  return (type && FROM_MAP[type]) || DEFAULT_FROM;
+function resolveFrom(type, appName) {
+  const app = appName || DEFAULT_APP;
+  const entry = type && TYPE_MAP[type];
+  if (!entry) return `${app} <noreply@${DOMAIN}>`;
+  const name = entry.label ? `${app} ${entry.label}` : app;
+  return `${name} <${entry.address}@${DOMAIN}>`;
 }
 
-export async function sendEmail({ to, subject, html, text, type = null, jobId = null }) {
+export async function sendEmail({ to, subject, html, text, type = null, appName = null, jobId = null }) {
   try {
     await resend.emails.send({
-      from: resolveFrom(type),
+      from: resolveFrom(type, appName),
       to,
       subject,
       html,

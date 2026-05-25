@@ -30,6 +30,8 @@ export function registerJob(job) {
         subject: job.subject,
         html: job.body_html,
         text: job.body_text,
+        type: job.metadata?.emailType ?? null,
+        appName: job.app_name ?? null,
         jobId: job.id,
       });
 

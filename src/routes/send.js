@@ -8,7 +8,7 @@ const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 router.post('/', requireApiKey, async (req, res, next) => {
   try {
-    const { to, subject, html, text, type } = req.body;
+    const { to, subject, html, text, type, appName } = req.body;
 
     if (!to || !EMAIL_RE.test(to)) {
       return res.status(400).json({ error: 'Valid recipient email is required', code: 'VALIDATION_ERROR' });
@@ -20,7 +20,7 @@ router.post('/', requireApiKey, async (req, res, next) => {
       return res.status(400).json({ error: 'At least one of html or text is required', code: 'VALIDATION_ERROR' });
     }
 
-    await sendEmail({ to, subject, html, text, type, jobId: null });
+    await sendEmail({ to, subject, html, text, type, appName, jobId: null });
 
     res.json({ success: true, data: { message: 'Email sent', recipient: to } });
   } catch (err) {

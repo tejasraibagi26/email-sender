@@ -3,12 +3,14 @@ import { createClient } from '@supabase/supabase-js';
 import { timingSafeEqual } from 'crypto';
 
 const DOMAIN = 'mails.useuplift.live';
-const FROM_MAP = {
-  invite: `Uplift Invites <invite@${DOMAIN}>`,
-  notification: `Uplift <notifications@${DOMAIN}>`,
-  alert: `Uplift Alerts <alerts@${DOMAIN}>`,
+const DEFAULT_APP = 'Uplift';
+
+const TYPE_MAP = {
+  invite:       { label: 'Invites',      address: 'invite' },
+  notification: { label: null,           address: 'notifications' },
+  alert:        { label: 'Alerts',       address: 'alerts' },
+  digest:       { label: 'Digest',       address: 'digest' },
 };
-const DEFAULT_FROM = `Uplift <noreply@${DOMAIN}>`;
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
@@ -47,7 +49,12 @@ export default async function handler(req, res) {
   }
 
   const resend = new Resend(process.env.RESEND_API_KEY);
-  const from = (type && FROM_MAP[type]) || DEFAULT_FROM;
+  const { appName } = req.body;
+  const app = appName || DEFAULT_APP;
+  const entry = type && TYPE_MAP[type];
+  const fromName = entry ? (entry.label ? `${app} ${entry.label}` : app) : app;
+  const fromAddress = entry ? `${entry.address}@${DOMAIN}` : `noreply@${DOMAIN}`;
+  const from = `${fromName} <${fromAddress}>`;
 
   const supabase = createClient(
     process.env.SUPABASE_URL,

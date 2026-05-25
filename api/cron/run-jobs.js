@@ -1,6 +1,6 @@
 import { Receiver } from '@upstash/qstash';
 import { createClient } from '@supabase/supabase-js';
-import nodemailer from 'nodemailer';
+import { Resend } from 'resend';
 import cronParser from 'cron-parser';
 
 const receiver = new Receiver({
@@ -14,13 +14,25 @@ const supabase = createClient(
   { auth: { persistSession: false } }
 );
 
-const transporter = nodemailer.createTransport({
-  service: 'gmail',
-  auth: {
-    user: process.env.GMAIL_USER,
-    pass: process.env.GMAIL_APP_PASSWORD,
-  },
-});
+const resend = new Resend(process.env.RESEND_API_KEY);
+
+const DOMAIN = 'mails.useuplift.live';
+const DEFAULT_APP = 'Uplift';
+
+const TYPE_MAP = {
+  invite:       { label: 'Invites',      address: 'invite' },
+  notification: { label: null,           address: 'notifications' },
+  alert:        { label: 'Alerts',       address: 'alerts' },
+  digest:       { label: 'Digest',       address: 'digest' },
+};
+
+function resolveFrom(type, appName) {
+  const app = appName || DEFAULT_APP;
+  const entry = type && TYPE_MAP[type];
+  if (!entry) return `${app} <noreply@${DOMAIN}>`;
+  const name = entry.label ? `${app} ${entry.label}` : app;
+  return `${name} <${entry.address}@${DOMAIN}>`;
+}
 
 function computeNextRun(cronExpression) {
   try {
@@ -92,21 +104,25 @@ export default async function handler(req, res) {
           const { subject, html } = await digestRes.json();
           console.log(`[job:${job.id}] Got digest — subject: "${subject}", html length: ${html?.length ?? 0}`);
 
-          await transporter.sendMail({
-            from: `"Market Analytics" <${process.env.GMAIL_USER}>`,
+          const digestFrom = resolveFrom(job.metadata?.emailType ?? 'digest', job.app_name);
+          const digestResult = await resend.emails.send({
+            from: digestFrom,
             to: job.recipient,
             subject,
             html,
           });
+          if (digestResult.error) throw new Error(digestResult.error.message);
           console.log(`[job:${job.id}] Email sent to ${job.recipient}`);
         } else {
-          await transporter.sendMail({
-            from: `"${job.app_name ?? 'Email Service'}" <${process.env.GMAIL_USER}>`,
+          const from = resolveFrom(job.metadata?.emailType, job.app_name);
+          const result = await resend.emails.send({
+            from,
             to: job.recipient,
             subject: job.subject,
             html: job.body_html ?? undefined,
             text: job.body_text ?? undefined,
           });
+          if (result.error) throw new Error(result.error.message);
           console.log(`[job:${job.id}] Standard email sent to ${job.recipient}`);
         }
 
