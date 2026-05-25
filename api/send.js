@@ -2,7 +2,7 @@ import { Resend } from 'resend';
 import { createClient } from '@supabase/supabase-js';
 import { timingSafeEqual } from 'crypto';
 
-const DOMAIN = 'mail.useuplift.live';
+const DOMAIN = 'mails.useuplift.live';
 const FROM_MAP = {
   invite: `Uplift Invites <invite@${DOMAIN}>`,
   notification: `Uplift <notifications@${DOMAIN}>`,

@@ -3,7 +3,7 @@ import supabase from './supabase.js';
 
 const resend = new Resend(process.env.RESEND_API_KEY);
 
-const DOMAIN = 'mail.useuplift.live';
+const DOMAIN = 'mails.useuplift.live';
 
 const FROM_MAP = {
   invite: `Uplift Invites <invite@${DOMAIN}>`,
