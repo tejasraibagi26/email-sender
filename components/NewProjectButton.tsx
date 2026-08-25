@@ -23,7 +23,7 @@ export function NewProjectButton() {
       </button>
 
       {open && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-ink/40" onClick={() => setOpen(false)}>
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-scrim/45" onClick={() => setOpen(false)}>
           <form
             action={formAction}
             onClick={(e) => e.stopPropagation()}

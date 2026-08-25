@@ -13,32 +13,33 @@ const config: Config = {
   theme: {
     extend: {
       colors: {
-        bg: '#f6f1e7',
-        surface: '#ffffff',
-        'surface-alt': '#fbf7ef',
-        border: '#e6dfce',
-        ink: '#1c1712',
+        bg: 'rgb(var(--color-bg) / <alpha-value>)',
+        surface: 'rgb(var(--color-surface) / <alpha-value>)',
+        'surface-alt': 'rgb(var(--color-surface-alt) / <alpha-value>)',
+        border: 'rgb(var(--color-border) / <alpha-value>)',
+        ink: 'rgb(var(--color-ink) / <alpha-value>)',
+        scrim: 'rgb(var(--color-scrim) / <alpha-value>)',
         accent: {
-          DEFAULT: '#c1571f',
-          hover: '#a6481a',
-          soft: '#f1dfc8',
+          DEFAULT: 'rgb(var(--color-accent) / <alpha-value>)',
+          hover: 'rgb(var(--color-accent-hover) / <alpha-value>)',
+          soft: 'rgb(var(--color-accent-soft) / <alpha-value>)',
         },
         success: {
-          DEFAULT: '#2e7d5b',
-          soft: '#dceee3',
+          DEFAULT: 'rgb(var(--color-success) / <alpha-value>)',
+          soft: 'rgb(var(--color-success-soft) / <alpha-value>)',
         },
         error: {
-          DEFAULT: '#b7402e',
-          soft: '#f4e1da',
+          DEFAULT: 'rgb(var(--color-error) / <alpha-value>)',
+          soft: 'rgb(var(--color-error-soft) / <alpha-value>)',
         },
         pending: {
-          DEFAULT: '#a6790e',
-          soft: '#f1e7ce',
+          DEFAULT: 'rgb(var(--color-pending) / <alpha-value>)',
+          soft: 'rgb(var(--color-pending-soft) / <alpha-value>)',
         },
         code: {
-          bg: '#1e1811',
-          border: '#33291d',
-          text: '#e9dfce',
+          bg: 'rgb(var(--color-code-bg) / <alpha-value>)',
+          border: 'rgb(var(--color-code-border) / <alpha-value>)',
+          text: 'rgb(var(--color-code-text) / <alpha-value>)',
         },
       },
       fontFamily: {

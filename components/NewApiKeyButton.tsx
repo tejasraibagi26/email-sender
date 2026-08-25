@@ -30,7 +30,7 @@ export function NewApiKeyButton({ projectId }: { projectId: string }) {
       </button>
 
       {open && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-ink/40" onClick={() => !state.rawKey && close()}>
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-scrim/45" onClick={() => !state.rawKey && close()}>
           <div onClick={(e) => e.stopPropagation()} className="w-[460px] rounded-2xl border border-border bg-surface p-7 shadow-2xl">
             {!state.rawKey ? (
               <form action={formAction}>

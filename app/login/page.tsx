@@ -30,10 +30,7 @@ export default function LoginPage() {
   }
 
   return (
-    <div
-      className="flex min-h-screen items-center justify-center"
-      style={{ background: 'radial-gradient(ellipse 900px 500px at 50% 0%, rgba(193,87,31,0.07), transparent 70%), #F6F1E7' }}
-    >
+    <div className="flex min-h-screen items-center justify-center bg-[radial-gradient(ellipse_900px_500px_at_50%_0%,rgb(var(--color-accent)/0.08),transparent_70%)] bg-bg">
       <div className="w-[380px]">
         <div className="mb-[34px] flex flex-col items-center">
           <div className="mb-4 flex h-10 w-10 items-center justify-center rounded-[10px] bg-accent">

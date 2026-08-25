@@ -32,7 +32,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html lang="en" className={`${manrope.variable} ${instrumentSerif.variable} ${jetbrainsMono.variable}`} suppressHydrationWarning>
       <body className="font-sans antialiased">
-        <RootProvider theme={{ forcedTheme: 'light', enableSystem: false }}>{children}</RootProvider>
+        <RootProvider theme={{ defaultTheme: 'light', enableSystem: false }}>{children}</RootProvider>
       </body>
     </html>
   );

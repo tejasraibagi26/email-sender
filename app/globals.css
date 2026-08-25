@@ -2,7 +2,84 @@
 @tailwind components;
 @tailwind utilities;
 
+:root {
+  --color-bg: 246 241 231; /* #f6f1e7 */
+  --color-surface: 255 255 255; /* #ffffff */
+  --color-surface-alt: 251 247 239; /* #fbf7ef */
+  --color-border: 230 223 206; /* #e6dfce */
+  --color-ink: 28 23 18; /* #1c1712 */
+  --color-accent: 193 87 31; /* #c1571f */
+  --color-accent-hover: 166 72 26; /* #a6481a */
+  --color-accent-soft: 241 223 200; /* #f1dfc8 */
+  --color-success: 46 125 91; /* #2e7d5b */
+  --color-success-soft: 220 238 227; /* #dceee3 */
+  --color-error: 183 64 46; /* #b7402e */
+  --color-error-soft: 244 225 218; /* #f4e1da */
+  --color-pending: 166 121 14; /* #a6790e */
+  --color-pending-soft: 241 231 206; /* #f1e7ce */
+  --color-code-bg: 30 24 17; /* #1e1811 */
+  --color-code-border: 51 41 29; /* #33291d */
+  --color-code-text: 233 223 206; /* #e9dfce */
+  --color-scrim: 15 13 10; /* always-dark modal backdrop, independent of theme */
+
+  /* Fumadocs' own theme tokens (HSL triplets), aligned to the brand palette above
+     so the /docs chrome matches instead of using fumadocs' generic gray theme. */
+  --fd-background: 40 45% 94%;
+  --fd-foreground: 30 22% 9%;
+  --fd-muted: 40 60% 96%;
+  --fd-muted-foreground: 30 10% 42%;
+  --fd-popover: 0 0% 100%;
+  --fd-popover-foreground: 30 22% 9%;
+  --fd-card: 0 0% 100%;
+  --fd-card-foreground: 30 22% 9%;
+  --fd-border: 42 32% 85%;
+  --fd-primary: 30 22% 9%;
+  --fd-primary-foreground: 40 45% 94%;
+  --fd-secondary: 40 60% 96%;
+  --fd-secondary-foreground: 30 22% 9%;
+  --fd-accent: 34 59% 86%;
+  --fd-accent-foreground: 21 72% 44%;
+  --fd-ring: 21 72% 44%;
+}
+
+.dark {
+  --color-bg: 23 19 16; /* #171310 */
+  --color-surface: 32 26 21; /* #201a15 */
+  --color-surface-alt: 38 31 25; /* #261f19 */
+  --color-border: 58 48 37; /* #3a3025 */
+  --color-ink: 243 237 226; /* #f3ede2 */
+  --color-accent: 208 100 55; /* #d06437 — bright enough to pop on dark, dark enough for white button text */
+  --color-accent-hover: 225 128 78; /* #e1804e */
+  --color-accent-soft: 58 42 28; /* #3a2a1c */
+  --color-success: 92 173 135; /* #5cad87 */
+  --color-success-soft: 31 54 44; /* #1f362c */
+  --color-error: 217 116 96; /* #d97460 */
+  --color-error-soft: 58 35 31; /* #3a231f */
+  --color-pending: 209 165 66; /* #d1a542 */
+  --color-pending-soft: 51 43 22; /* #332b16 */
+  --color-code-bg: 12 10 8; /* #0c0a08 — deliberately darker than page bg for separation */
+  --color-code-border: 38 31 24;
+  --color-code-text: 233 223 206;
+
+  --fd-background: 26 18% 8%;
+  --fd-foreground: 39 41% 92%;
+  --fd-muted: 28 21% 12%;
+  --fd-muted-foreground: 39 15% 65%;
+  --fd-popover: 27 21% 10%;
+  --fd-popover-foreground: 39 41% 92%;
+  --fd-card: 27 21% 10%;
+  --fd-card-foreground: 39 41% 92%;
+  --fd-border: 31 22% 19%;
+  --fd-primary: 39 41% 92%;
+  --fd-primary-foreground: 26 18% 8%;
+  --fd-secondary: 28 21% 12%;
+  --fd-secondary-foreground: 39 41% 92%;
+  --fd-accent: 28 35% 17%;
+  --fd-accent-foreground: 18 62% 52%;
+  --fd-ring: 18 62% 52%;
+}
+
 body {
-  background: theme('colors.bg');
-  color: theme('colors.ink');
+  background: rgb(var(--color-bg));
+  color: rgb(var(--color-ink));
 }
