@@ -1,10 +1,13 @@
 'use client';
 
-import { useState } from 'react';
-import { createProject } from '@/app/(dashboard)/dashboard/actions';
+import { useActionState, useState } from 'react';
+import { createProject, type CreateProjectState } from '@/app/(dashboard)/dashboard/actions';
+
+const initialState: CreateProjectState = { error: null };
 
 export function NewProjectButton() {
   const [open, setOpen] = useState(false);
+  const [state, formAction, pending] = useActionState(createProject, initialState);
 
   return (
     <>
@@ -22,7 +25,7 @@ export function NewProjectButton() {
       {open && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-ink/40" onClick={() => setOpen(false)}>
           <form
-            action={createProject}
+            action={formAction}
             onClick={(e) => e.stopPropagation()}
             className="w-[420px] rounded-2xl border border-border bg-surface p-7 shadow-2xl"
           >
@@ -46,6 +49,8 @@ export function NewProjectButton() {
             />
             <p className="mb-5 text-[12px] text-ink/40">Shown in the &quot;From&quot; name on every email this project sends.</p>
 
+            {state.error && <p className="mb-4 text-[13px] text-error">{state.error}</p>}
+
             <div className="flex gap-2.5">
               <button
                 type="button"
@@ -54,8 +59,12 @@ export function NewProjectButton() {
               >
                 Cancel
               </button>
-              <button type="submit" className="flex-1 rounded-lg bg-accent py-2.5 text-[13.5px] font-bold text-[#FBF3E7]">
-                Create project
+              <button
+                type="submit"
+                disabled={pending}
+                className="flex-1 rounded-lg bg-accent py-2.5 text-[13.5px] font-bold text-[#FBF3E7] disabled:opacity-60"
+              >
+                {pending ? 'Creating…' : 'Create project'}
               </button>
             </div>
           </form>

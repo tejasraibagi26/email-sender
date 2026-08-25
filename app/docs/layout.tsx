@@ -16,7 +16,7 @@ const navTitle = (
 
 export default function Layout({ children }: { children: ReactNode }) {
   return (
-    <DocsLayout tree={source.pageTree} nav={{ title: navTitle, url: '/' }}>
+    <DocsLayout tree={source.pageTree} nav={{ title: navTitle, url: '/' }} disableThemeSwitch>
       {children}
     </DocsLayout>
   );

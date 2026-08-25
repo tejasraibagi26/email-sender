@@ -6,7 +6,12 @@ import { generateApiKey } from '@/lib/apiAuth';
 import { createClient } from '@/lib/supabase/server';
 import { supabaseAdmin } from '@/lib/supabase/admin';
 
-export async function createProject(formData: FormData) {
+export type CreateProjectState = { error: string | null };
+
+export async function createProject(
+  _prev: CreateProjectState,
+  formData: FormData,
+): Promise<CreateProjectState> {
   const supabase = await createClient();
   const {
     data: { user },
@@ -15,7 +20,9 @@ export async function createProject(formData: FormData) {
 
   const name = String(formData.get('name') ?? '').trim();
   const appName = String(formData.get('app_name') ?? '').trim();
-  if (!name || !appName) return;
+  if (!name || !appName) {
+    return { error: 'Project name and "sends as" name are both required.' };
+  }
 
   const { data: project, error } = await supabase
     .from('projects')
@@ -23,7 +30,9 @@ export async function createProject(formData: FormData) {
     .select('id')
     .single();
 
-  if (error || !project) return;
+  if (error || !project) {
+    return { error: error?.message ?? 'Could not create the project — please try again.' };
+  }
 
   revalidatePath('/dashboard');
   redirect(`/dashboard/projects/${project.id}`);

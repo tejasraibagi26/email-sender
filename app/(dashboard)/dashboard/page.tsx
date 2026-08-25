@@ -48,8 +48,23 @@ export default async function DashboardPage() {
       </div>
 
       {withStats.length === 0 ? (
-        <div className="rounded-2xl border border-dashed border-border py-20 text-center text-sm text-ink/50">
-          No projects yet — create one to generate your first API key.
+        <div className="flex flex-col items-center rounded-2xl border border-dashed border-border py-24 text-center">
+          <div className="relative mb-6 flex h-20 w-20 items-center justify-center rounded-2xl bg-accent-soft">
+            <svg width="38" height="38" viewBox="0 0 24 24" fill="none" stroke="#C1571F" strokeWidth={1.6} strokeLinecap="round" strokeLinejoin="round">
+              <rect x="3" y="5" width="18" height="14" rx="2.5" />
+              <path d="M3 7L11.15 13.09a1.5 1.5 0 001.7 0L21 7" />
+            </svg>
+            <div className="absolute -bottom-2 -right-2 flex h-7 w-7 items-center justify-center rounded-full border-2 border-bg bg-accent">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#FBF3E7" strokeWidth={3} strokeLinecap="round" strokeLinejoin="round">
+                <path d="M12 5V19" />
+                <path d="M5 12H19" />
+              </svg>
+            </div>
+          </div>
+          <h2 className="mb-1.5 font-serif text-xl">No projects yet</h2>
+          <p className="max-w-[300px] text-sm text-ink/50">
+            Create a project to get an API key and start sending — each project keeps its own keys, logs, and jobs.
+          </p>
         </div>
       ) : (
         <div className="grid grid-cols-3 gap-[18px]">
