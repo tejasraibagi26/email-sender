@@ -1,0 +1,50 @@
+---
+title: Scheduled Jobs
+description: Create and manage recurring sends.
+---
+
+Scheduled jobs send the same email on a recurring cadence — daily digests, weekly reports, monthly reminders.
+
+## Create a job
+
+Describe the cadence with a human-friendly `frequency`, or pass a raw cron expression.
+
+```bash
+curl -X POST https://send.useuplift.live/api/v1/jobs \
+  -H "Authorization: Bearer sbu_live_..." \
+  -H "Content-Type: application/json" \
+  -d '{
+    "name": "Daily standup reminder",
+    "to": "team@example.com",
+    "subject": "Daily reminder",
+    "html": "<p>Time for standup!</p>",
+    "frequency": "daily",
+    "time": "09:00"
+  }'
+```
+
+| `frequency` | Extra fields | Example cron |
+|---|---|---|
+| `hourly` | — | `0 * * * *` |
+| `daily` | `time` | `0 9 * * *` |
+| `weekly` | `time`, `day` | `0 12 * * 1` |
+| `weekdays` | `time` | `0 8 * * 1-5` |
+| `monthly` | `time`, `day` (1–28) | `0 7 1 * *` |
+
+Or pass `cronExpression` directly instead of `frequency`/`time`/`day`.
+
+## List jobs
+
+```bash
+curl https://send.useuplift.live/api/v1/jobs \
+  -H "Authorization: Bearer sbu_live_..."
+```
+
+## Cancel a job
+
+```bash
+curl -X DELETE https://send.useuplift.live/api/v1/jobs/<job-id> \
+  -H "Authorization: Bearer sbu_live_..."
+```
+
+Jobs can also be paused, resumed, or deleted from the project's **Jobs** tab in the dashboard.

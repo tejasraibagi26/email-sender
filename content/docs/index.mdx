@@ -1,0 +1,27 @@
+---
+title: Getting Started
+description: Send your first email with the Send API.
+---
+
+## Overview
+
+Send is the email API for every app under the Uplift umbrella. It handles transactional sends, scheduled recurring sends, and delivery status — all scoped to a project-specific API key.
+
+## Quickstart
+
+1. Sign in to the [dashboard](/dashboard) and open your project.
+2. Create an API key from the **API Keys** tab — it's shown once, so copy it somewhere safe.
+3. Send your first email:
+
+```bash
+curl https://send.useuplift.live/api/v1/send \
+  -H "Authorization: Bearer sbu_live_..." \
+  -H "Content-Type: application/json" \
+  -d '{
+    "to": "user@example.com",
+    "subject": "Hello from Send",
+    "html": "<p>You are in.</p>"
+  }'
+```
+
+Continue to [Authentication](/docs/authentication) for details on how keys are scoped.

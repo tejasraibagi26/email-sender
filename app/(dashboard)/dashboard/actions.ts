@@ -1,0 +1,112 @@
+'use server';
+
+import { revalidatePath } from 'next/cache';
+import { redirect } from 'next/navigation';
+import { generateApiKey } from '@/lib/apiAuth';
+import { createClient } from '@/lib/supabase/server';
+import { supabaseAdmin } from '@/lib/supabase/admin';
+
+export async function createProject(formData: FormData) {
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) redirect('/login');
+
+  const name = String(formData.get('name') ?? '').trim();
+  const appName = String(formData.get('app_name') ?? '').trim();
+  if (!name || !appName) return;
+
+  const { data: project, error } = await supabase
+    .from('projects')
+    .insert({ owner_id: user.id, name, app_name: appName })
+    .select('id')
+    .single();
+
+  if (error || !project) return;
+
+  revalidatePath('/dashboard');
+  redirect(`/dashboard/projects/${project.id}`);
+}
+
+export type CreateKeyState = { rawKey: string | null; error: string | null };
+
+export async function createApiKey(
+  projectId: string,
+  _prev: CreateKeyState,
+  formData: FormData,
+): Promise<CreateKeyState> {
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) redirect('/login');
+
+  const name = String(formData.get('name') ?? '').trim() || 'API key';
+  const { raw, hash, displayPrefix } = generateApiKey();
+
+  // api_keys has a full RLS policy (see migration 002), so the RLS-scoped client
+  // can insert directly — it fails closed if projectId isn't owned by this user.
+  const { error } = await supabase.from('api_keys').insert({
+    project_id: projectId,
+    name,
+    key_hash: hash,
+    key_prefix: displayPrefix,
+  });
+
+  if (error) return { rawKey: null, error: error.message };
+
+  revalidatePath(`/dashboard/projects/${projectId}`);
+  return { rawKey: raw, error: null };
+}
+
+export async function revokeApiKey(formData: FormData) {
+  const supabase = await createClient();
+  const keyId = String(formData.get('key_id'));
+  const projectId = String(formData.get('project_id'));
+
+  await supabase.from('api_keys').update({ revoked_at: new Date().toISOString() }).eq('id', keyId);
+  revalidatePath(`/dashboard/projects/${projectId}`);
+}
+
+/**
+ * email_jobs has no RLS write policy (writes normally go through the API-key
+ * authenticated routes only — see migration 002), so dashboard job actions
+ * verify project ownership through the RLS-scoped client first, then perform
+ * the write with the service-role client, filtered by that same project_id.
+ */
+async function assertOwnsProject(projectId: string) {
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) redirect('/login');
+
+  const { data: project } = await supabase.from('projects').select('id').eq('id', projectId).maybeSingle();
+  if (!project) redirect('/login');
+}
+
+export async function toggleJobStatus(formData: FormData) {
+  const jobId = String(formData.get('job_id'));
+  const projectId = String(formData.get('project_id'));
+  const nextStatus = String(formData.get('next_status'));
+
+  await assertOwnsProject(projectId);
+  await supabaseAdmin.from('email_jobs').update({ status: nextStatus }).eq('id', jobId).eq('project_id', projectId);
+  revalidatePath(`/dashboard/projects/${projectId}`);
+}
+
+export async function deleteJob(formData: FormData) {
+  const jobId = String(formData.get('job_id'));
+  const projectId = String(formData.get('project_id'));
+
+  await assertOwnsProject(projectId);
+  await supabaseAdmin.from('email_jobs').delete().eq('id', jobId).eq('project_id', projectId);
+  revalidatePath(`/dashboard/projects/${projectId}`);
+}
+
+export async function signOut() {
+  const supabase = await createClient();
+  await supabase.auth.signOut();
+  redirect('/login');
+}

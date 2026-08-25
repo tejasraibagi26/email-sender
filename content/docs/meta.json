@@ -1,0 +1,4 @@
+{
+  "title": "Send",
+  "pages": ["index", "authentication", "send-an-email", "scheduled-jobs", "check-status", "error-codes"]
+}

@@ -1,0 +1,26 @@
+---
+title: Authentication
+description: How project-scoped API keys work.
+---
+
+Every request to the Send API is authenticated with a project-scoped API key. Generate one from your project's **API Keys** tab — it's shown once, so store it somewhere safe.
+
+```bash
+Authorization: Bearer sbu_live_9f2c81a4e7b3d05f1c8a
+```
+
+## Key format
+
+Keys are prefixed by environment and scoped to a single project:
+
+| Prefix | Scope |
+|---|---|
+| `sbu_live_` | One project — read/write for that project's sends and jobs |
+
+## Scoping
+
+A key can only read and write data for the project it belongs to — sending with one project's key never touches another project's logs or jobs. The "From" name on every email is derived from the project itself, not from anything the caller sends, so one project's key can never impersonate another project's name.
+
+## Revoking a key
+
+Revoke a key any time from the dashboard. Revoked keys are rejected immediately — in-flight requests already accepted are unaffected, but no new requests will authenticate.

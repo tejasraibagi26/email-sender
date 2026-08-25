@@ -1,0 +1,42 @@
+---
+title: Send an Email
+description: POST /api/v1/send — send a transactional email immediately.
+---
+
+## Request
+
+```bash
+curl https://send.useuplift.live/api/v1/send \
+  -H "Authorization: Bearer sbu_live_..." \
+  -H "Content-Type: application/json" \
+  -d '{
+    "to": "user@example.com",
+    "subject": "Welcome to Aggregator",
+    "html": "<p>You are in.</p>"
+  }'
+```
+
+## Parameters
+
+| Field | Type | Required | Description |
+|---|---|---|---|
+| `to` | string | yes | Recipient email address |
+| `subject` | string | yes | Email subject |
+| `html` | string | one of `html`/`text` | HTML body |
+| `text` | string | one of `html`/`text` | Plain-text fallback body |
+| `type` | string | no | `invite` \| `notification` \| `alert` \| `digest` — changes the "From" address/label |
+
+## Response
+
+```json
+{
+  "success": true,
+  "data": {
+    "id": "3f2e1a9c-...",
+    "status": "sent",
+    "recipient": "user@example.com"
+  }
+}
+```
+
+`data.id` is the id of the created send record — use it with [Check Send Status](/docs/check-status) to poll for delivery outcome, or find it later in the project's Logs tab.

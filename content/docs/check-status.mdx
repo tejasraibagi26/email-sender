@@ -1,0 +1,40 @@
+---
+title: Check Send Status
+description: Poll a send by id, or list recent sends for your project.
+---
+
+Send never fails silently — every attempt, successful or not, is recorded and queryable.
+
+## Check a single send
+
+```bash
+curl https://send.useuplift.live/api/v1/emails/<email-id> \
+  -H "Authorization: Bearer sbu_live_..."
+```
+
+```json
+{
+  "success": true,
+  "data": {
+    "email": {
+      "id": "3f2e1a9c-...",
+      "recipient": "user@example.com",
+      "subject": "Welcome to Aggregator",
+      "status": "sent",
+      "error": null,
+      "sent_at": "2026-02-03T09:12:04.000Z"
+    }
+  }
+}
+```
+
+`status` is either `sent` or `failed`. When `failed`, `error` carries the reason.
+
+## List recent sends
+
+```bash
+curl "https://send.useuplift.live/api/v1/emails?status=failed&limit=25" \
+  -H "Authorization: Bearer sbu_live_..."
+```
+
+Supports `status`, `recipient` (substring match), `limit` (max 100), and `offset` query params. The same data is browsable in the project's **Logs** tab.

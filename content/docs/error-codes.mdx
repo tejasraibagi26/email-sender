@@ -1,0 +1,19 @@
+---
+title: Error Codes
+description: Every error the API can return.
+---
+
+Errors always have the shape:
+
+```json
+{ "error": "human-readable message", "code": "MACHINE_READABLE_CODE" }
+```
+
+| HTTP status | `code` | Meaning |
+|---|---|---|
+| 400 | `VALIDATION_ERROR` | The request body failed validation — see `error` for which field |
+| 401 | `INVALID_API_KEY` | Missing, malformed, or revoked API key |
+| 404 | `EMAIL_NOT_FOUND` | No send with that id exists for your project |
+| 404 | `JOB_NOT_FOUND` | No job with that id exists for your project |
+| 500 | `INTERNAL_ERROR` | Something went wrong on our side — safe to retry |
+| 502 | `SEND_FAILED` | The email provider rejected or failed to deliver the send |
