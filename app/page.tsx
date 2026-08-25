@@ -30,7 +30,7 @@ export default function HomePage() {
         <span className="inline-flex items-center gap-2 rounded-full border border-border bg-surface-alt px-3.5 py-1.5 font-mono text-[11.5px] uppercase tracking-[.07em] text-ink/40">
           Uplift internal tools
         </span>
-        <h1 className="mt-[26px] mb-[22px] text-[60px] leading-[1.08] tracking-[-0.01em]">
+        <h1 className="mt-[26px] mb-[22px] font-serif text-[60px] leading-[1.08] tracking-[-0.01em]">
           Email infrastructure
           <br />
           for every app you ship.
