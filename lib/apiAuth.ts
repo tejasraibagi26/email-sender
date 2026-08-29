@@ -18,6 +18,7 @@ export type AuthenticatedProject = {
   id: string;
   name: string;
   app_name: string;
+  sender_address: string | null;
 };
 
 type AuthResult = { project: AuthenticatedProject } | { error: Response };
@@ -34,7 +35,7 @@ export async function authenticateApiKey(request: Request): Promise<AuthResult> 
 
   const { data: key, error } = await supabaseAdmin
     .from('api_keys')
-    .select('id, revoked_at, projects(id, name, app_name)')
+    .select('id, revoked_at, projects(id, name, app_name, sender_address)')
     .eq('key_hash', hash)
     .is('revoked_at', null)
     .maybeSingle();

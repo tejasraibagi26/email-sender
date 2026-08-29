@@ -1,10 +1,11 @@
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { NewApiKeyButton } from '@/components/NewApiKeyButton';
+import { SenderAddressForm } from '@/components/SenderAddressForm';
 import { createClient } from '@/lib/supabase/server';
 import { deleteJob, revokeApiKey, toggleJobStatus } from '../../actions';
 
-type Tab = 'keys' | 'logs' | 'jobs';
+type Tab = 'keys' | 'logs' | 'jobs' | 'settings';
 
 function formatDate(value: string | null) {
   if (!value) return 'Never';
@@ -32,7 +33,7 @@ export default async function ProjectDetailPage({
 }) {
   const { projectId } = await params;
   const { tab: tabParam } = await searchParams;
-  const tab: Tab = tabParam === 'logs' || tabParam === 'jobs' ? tabParam : 'keys';
+  const tab: Tab = tabParam === 'logs' || tabParam === 'jobs' || tabParam === 'settings' ? tabParam : 'keys';
 
   const supabase = await createClient();
   const { data: project } = await supabase.from('projects').select('*').eq('id', projectId).maybeSingle();
@@ -64,11 +65,15 @@ export default async function ProjectDetailPage({
         <Link href={tabHref('jobs')} className={tabClass('jobs')}>
           Jobs
         </Link>
+        <Link href={tabHref('settings')} className={tabClass('settings')}>
+          Settings
+        </Link>
       </div>
 
       {tab === 'keys' && <KeysTab supabase={supabase} projectId={projectId} />}
       {tab === 'logs' && <LogsTab supabase={supabase} projectId={projectId} />}
       {tab === 'jobs' && <JobsTab supabase={supabase} projectId={projectId} />}
+      {tab === 'settings' && <SenderAddressForm projectId={projectId} senderAddress={project.sender_address} />}
     </div>
   );
 }

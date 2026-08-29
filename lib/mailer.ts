@@ -13,15 +13,19 @@ export const TYPE_MAP: Record<string, { label: string | null; address: string }>
   digest: { label: 'Digest', address: 'digest' },
 };
 
-export function resolveFrom(type: string | null | undefined, appName: string): string {
+export function resolveFrom(
+  type: string | null | undefined,
+  appName: string,
+  senderAddress?: string | null,
+): string {
   const entry = type ? TYPE_MAP[type] : undefined;
-  if (!entry) return `${appName} <noreply@${DOMAIN}>`;
+  if (!entry) return `${appName} <${senderAddress || 'noreply'}@${DOMAIN}>`;
   const name = entry.label ? `${appName} ${entry.label}` : appName;
   return `${name} <${entry.address}@${DOMAIN}>`;
 }
 
 export type SendEmailInput = {
-  project: Pick<AuthenticatedProject, 'id' | 'app_name'>;
+  project: Pick<AuthenticatedProject, 'id' | 'app_name' | 'sender_address'>;
   to: string;
   subject: string;
   html?: string | null;
@@ -55,7 +59,7 @@ export async function sendEmail({
   type = null,
   jobId = null,
 }: SendEmailInput): Promise<EmailLog> {
-  const from = resolveFrom(type, project.app_name);
+  const from = resolveFrom(type, project.app_name, project.sender_address);
 
   if (!html && !text) {
     throw new Error('At least one of html or text is required');

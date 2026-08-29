@@ -38,6 +38,38 @@ export async function createProject(
   redirect(`/dashboard/projects/${project.id}`);
 }
 
+export type UpdateSenderState = { error: string | null; success: boolean };
+
+const SENDER_ADDRESS_PATTERN = /^[a-z0-9]([a-z0-9._-]{0,62}[a-z0-9])?$/;
+
+export async function updateSenderAddress(
+  projectId: string,
+  _prev: UpdateSenderState,
+  formData: FormData,
+): Promise<UpdateSenderState> {
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) redirect('/login');
+
+  const raw = String(formData.get('sender_address') ?? '').trim().toLowerCase();
+  const senderAddress = raw === '' ? null : raw;
+
+  if (senderAddress && !SENDER_ADDRESS_PATTERN.test(senderAddress)) {
+    return {
+      error: 'Use only lowercase letters, numbers, dots, hyphens, or underscores.',
+      success: false,
+    };
+  }
+
+  const { error } = await supabase.from('projects').update({ sender_address: senderAddress }).eq('id', projectId);
+  if (error) return { error: error.message, success: false };
+
+  revalidatePath(`/dashboard/projects/${projectId}`);
+  return { error: null, success: true };
+}
+
 export type CreateKeyState = { rawKey: string | null; error: string | null };
 
 export async function createApiKey(

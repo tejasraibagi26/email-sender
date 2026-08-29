@@ -25,6 +25,7 @@ type EmailJob = {
   body_text: string | null;
   cron_expression: string;
   metadata: EmailJobMetadata | null;
+  projects: { sender_address: string | null } | { sender_address: string | null }[] | null;
 };
 
 export async function POST(request: Request) {
@@ -40,7 +41,7 @@ export async function POST(request: Request) {
 
   const { data: jobs, error } = await supabaseAdmin
     .from('email_jobs')
-    .select('*')
+    .select('*, projects(sender_address)')
     .eq('status', 'active')
     .lte('next_run_at', now);
 
@@ -55,7 +56,12 @@ export async function POST(request: Request) {
 
       // Jobs created before the SaaS migration may still carry a null project_id
       // until the one-time backfill (migration 003) runs; app_name is always set.
-      const project = { id: job.project_id ?? '', app_name: job.app_name ?? 'Uplift' };
+      const projectRow = Array.isArray(job.projects) ? job.projects[0] : job.projects;
+      const project = {
+        id: job.project_id ?? '',
+        app_name: job.app_name ?? 'Uplift',
+        sender_address: projectRow?.sender_address ?? null,
+      };
 
       try {
         if (job.metadata?.type === 'digest') {
