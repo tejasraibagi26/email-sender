@@ -21,6 +21,12 @@ Keys are prefixed by environment and scoped to a single project:
 
 A key can only read and write data for the project it belongs to — sending with one project's key never touches another project's logs or jobs. The "From" name on every email is derived from the project itself, not from anything the caller sends, so one project's key can never impersonate another project's name.
 
+## From address
+
+Every email sends from `<address>@mails.useuplift.live`. For `invite`, `notification`, `alert`, and `digest` sends (see the `type` field in [Send an Email](/docs/send-an-email)), the address is fixed — `invite@`, `notifications@`, `alerts@`, `digest@`.
+
+For everything else, the address defaults to `noreply@`. You can override this per project from the project's **Settings** tab in the dashboard — set a **Sender address** (e.g. `hello`) and untyped sends from that project will come from `hello@mails.useuplift.live` instead. Leave it blank to keep using `noreply@`.
+
 ## Revoking a key
 
 Revoke a key any time from the dashboard. Revoked keys are rejected immediately — in-flight requests already accepted are unaffected, but no new requests will authenticate.

@@ -24,7 +24,7 @@ curl https://send.useuplift.live/api/v1/send \
 | `subject` | string | yes | Email subject |
 | `html` | string | one of `html`/`text` | HTML body |
 | `text` | string | one of `html`/`text` | Plain-text fallback body |
-| `type` | string | no | `invite` \| `notification` \| `alert` \| `digest` — changes the "From" address/label |
+| `type` | string | no | `invite` \| `notification` \| `alert` \| `digest` — changes the "From" address/label. Omit for the project's default sender address (see [From address](/docs/authentication#from-address)) |
 
 ## Response
 
