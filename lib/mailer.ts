@@ -1,10 +1,11 @@
 import { Resend } from 'resend';
 import { supabaseAdmin } from './supabase/admin';
 import type { AuthenticatedProject } from './apiAuth';
+import { DOMAIN } from './emailDomain';
 
 const resend = new Resend(process.env.RESEND_API_KEY);
 
-export const DOMAIN = 'mails.useuplift.live';
+export { DOMAIN };
 
 export const TYPE_MAP: Record<string, { label: string | null; address: string }> = {
   invite: { label: 'Invites', address: 'invite' },

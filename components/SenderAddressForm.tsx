@@ -2,7 +2,7 @@
 
 import { useActionState } from 'react';
 import { updateSenderAddress, type UpdateSenderState } from '@/app/(dashboard)/dashboard/actions';
-import { DOMAIN } from '@/lib/mailer';
+import { DOMAIN } from '@/lib/emailDomain';
 
 const initialState: UpdateSenderState = { error: null, success: false };
 
