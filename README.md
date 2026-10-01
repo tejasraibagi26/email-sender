@@ -25,7 +25,7 @@ migrations/002_saas_accounts.sql
 
 `002` adds `projects` and `api_keys`, plus RLS policies scoping dashboard reads to the signed-in user's own projects.
 
-In **Authentication → Providers → Email**, turn **off** "Allow new users to sign up" — this app is invite-only. Create accounts directly from the Supabase dashboard (Authentication → Users → Add user).
+In **Authentication → Providers → Email**, turn **off** "Allow new users to sign up" — this app is invite-only. Create accounts with the admin endpoint (see [Creating accounts](#creating-accounts)) or from the Supabase dashboard (Authentication → Users → Add user).
 
 ### 2. Environment
 
@@ -74,8 +74,22 @@ Full reference lives at `/docs` once deployed. Summary:
 | `GET /api/v1/jobs` / `GET /api/v1/jobs/:id` | API key | List / inspect scheduled jobs |
 | `DELETE /api/v1/jobs/:id` | API key | Cancel a scheduled job |
 | `POST /api/cron/run-jobs` | QStash signature | Internal — fires due jobs |
+| `POST /api/admin/users` | `ADMIN_API_KEY` | Create a dashboard account |
 
 Every API key is scoped to one project; the "From" name on every email is derived from that project, never from the request body.
+
+## Creating accounts
+
+Dashboard accounts are created by an admin only — there is no public sign-up. Set `ADMIN_API_KEY` (e.g. `openssl rand -hex 32`), then:
+
+```bash
+curl -X POST https://<your-domain>/api/admin/users \
+  -H "Authorization: Bearer $ADMIN_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{"email":"someone@example.com"}'
+```
+
+Omit `password` and one is generated and returned **once** in the response; or pass `"password": "..."` (8+ characters) to set it yourself. The account is pre-confirmed and can sign in at `/login` immediately. Returns `409 USER_EXISTS` if the email is taken. The route is disabled (always `401`) while `ADMIN_API_KEY` is unset.
 
 ## Migrating existing callers (Uplift, portfolio-tracker, aggregator-service)
 
