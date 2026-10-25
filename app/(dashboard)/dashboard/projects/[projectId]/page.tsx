@@ -10,15 +10,18 @@ import { deleteJob, revokeApiKey, toggleJobStatus } from '../../actions';
 type Tab = 'keys' | 'logs' | 'jobs' | 'settings';
 type LogStatus = 'all' | 'sent' | 'failed';
 
+const LOGS_PAGE_SIZE = 20;
+
 export default async function ProjectDetailPage({
   params,
   searchParams,
 }: {
   params: Promise<{ projectId: string }>;
-  searchParams: Promise<{ tab?: string; status?: string }>;
+  searchParams: Promise<{ tab?: string; status?: string; page?: string }>;
 }) {
   const { projectId } = await params;
-  const { tab: tabParam, status: statusParam } = await searchParams;
+  const { tab: tabParam, status: statusParam, page: pageParam } = await searchParams;
+  const page = Math.max(1, Number.parseInt(pageParam ?? '1', 10) || 1);
   const status: LogStatus = statusParam === 'sent' || statusParam === 'failed' ? statusParam : 'all';
   const tab: Tab = tabParam === 'logs' || tabParam === 'jobs' || tabParam === 'settings' ? tabParam : 'keys';
 
@@ -69,7 +72,7 @@ export default async function ProjectDetailPage({
       </div>
 
       {tab === 'keys' && <KeysTab supabase={supabase} projectId={projectId} />}
-      {tab === 'logs' && <LogsTab supabase={supabase} projectId={projectId} status={status} />}
+      {tab === 'logs' && <LogsTab supabase={supabase} projectId={projectId} status={status} page={page} />}
       {tab === 'jobs' && <JobsTab supabase={supabase} projectId={projectId} />}
       {tab === 'settings' && <SenderAddressForm projectId={projectId} senderAddress={project.sender_address} />}
     </div>
@@ -133,14 +136,22 @@ async function LogsTab({
   supabase,
   projectId,
   status,
+  page,
 }: {
   supabase: Awaited<ReturnType<typeof createClient>>;
   projectId: string;
   status: LogStatus;
+  page: number;
 }) {
-  let query = supabase.from('email_logs').select('*').eq('project_id', projectId);
+  let query = supabase.from('email_logs').select('*', { count: 'exact' }).eq('project_id', projectId);
   if (status !== 'all') query = query.eq('status', status);
-  const { data: logs } = await query.order('sent_at', { ascending: false }).limit(50);
+  const from = (page - 1) * LOGS_PAGE_SIZE;
+  const { data: logs, count } = await query.order('sent_at', { ascending: false }).range(from, from + LOGS_PAGE_SIZE - 1);
+
+  const total = count ?? 0;
+  const pageCount = Math.max(1, Math.ceil(total / LOGS_PAGE_SIZE));
+  const logsHref = (p: number) =>
+    `/dashboard/projects/${projectId}?tab=logs${status === 'all' ? '' : `&status=${status}`}${p > 1 ? `&page=${p}` : ''}`;
 
   const filters: { id: LogStatus; label: string }[] = [
     { id: 'all', label: 'All' },
@@ -194,6 +205,33 @@ async function LogsTab({
           </div>
         ))}
       </div>
+
+      {total > 0 && (
+        <div className="mt-4 flex flex-wrap items-center justify-between gap-3 text-[13.5px] text-mute">
+          <span>
+            {from + 1}–{from + (logs ?? []).length} of {total.toLocaleString()}
+          </span>
+          <div className="flex items-center gap-2">
+            {page > 1 ? (
+              <Link href={logsHref(page - 1)} className="rounded-[10px] border border-border bg-surface px-3.5 py-2 font-semibold text-ink hover:border-ink/30">
+                Previous
+              </Link>
+            ) : (
+              <span className="rounded-[10px] border border-border px-3.5 py-2 font-semibold opacity-50">Previous</span>
+            )}
+            <span className="px-1">
+              Page {page} of {pageCount}
+            </span>
+            {page < pageCount ? (
+              <Link href={logsHref(page + 1)} className="rounded-[10px] border border-border bg-surface px-3.5 py-2 font-semibold text-ink hover:border-ink/30">
+                Next
+              </Link>
+            ) : (
+              <span className="rounded-[10px] border border-border px-3.5 py-2 font-semibold opacity-50">Next</span>
+            )}
+          </div>
+        </div>
+      )}
     </div>
   );
 }
