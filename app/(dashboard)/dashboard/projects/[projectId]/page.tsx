@@ -8,16 +8,18 @@ import { createClient } from '@/lib/supabase/server';
 import { deleteJob, revokeApiKey, toggleJobStatus } from '../../actions';
 
 type Tab = 'keys' | 'logs' | 'jobs' | 'settings';
+type LogStatus = 'all' | 'sent' | 'failed';
 
 export default async function ProjectDetailPage({
   params,
   searchParams,
 }: {
   params: Promise<{ projectId: string }>;
-  searchParams: Promise<{ tab?: string }>;
+  searchParams: Promise<{ tab?: string; status?: string }>;
 }) {
   const { projectId } = await params;
-  const { tab: tabParam } = await searchParams;
+  const { tab: tabParam, status: statusParam } = await searchParams;
+  const status: LogStatus = statusParam === 'sent' || statusParam === 'failed' ? statusParam : 'all';
   const tab: Tab = tabParam === 'logs' || tabParam === 'jobs' || tabParam === 'settings' ? tabParam : 'keys';
 
   const supabase = await createClient();
@@ -67,7 +69,7 @@ export default async function ProjectDetailPage({
       </div>
 
       {tab === 'keys' && <KeysTab supabase={supabase} projectId={projectId} />}
-      {tab === 'logs' && <LogsTab supabase={supabase} projectId={projectId} />}
+      {tab === 'logs' && <LogsTab supabase={supabase} projectId={projectId} status={status} />}
       {tab === 'jobs' && <JobsTab supabase={supabase} projectId={projectId} />}
       {tab === 'settings' && <SenderAddressForm projectId={projectId} senderAddress={project.sender_address} />}
     </div>
@@ -130,20 +132,39 @@ async function KeysTab({
 async function LogsTab({
   supabase,
   projectId,
+  status,
 }: {
   supabase: Awaited<ReturnType<typeof createClient>>;
   projectId: string;
+  status: LogStatus;
 }) {
-  const { data: logs } = await supabase
-    .from('email_logs')
-    .select('*')
-    .eq('project_id', projectId)
-    .order('sent_at', { ascending: false })
-    .limit(50);
+  let query = supabase.from('email_logs').select('*').eq('project_id', projectId);
+  if (status !== 'all') query = query.eq('status', status);
+  const { data: logs } = await query.order('sent_at', { ascending: false }).limit(50);
+
+  const filters: { id: LogStatus; label: string }[] = [
+    { id: 'all', label: 'All' },
+    { id: 'sent', label: 'Sent' },
+    { id: 'failed', label: 'Failed' },
+  ];
 
   return (
     <div>
-      <p className="mb-4 text-[14.5px] text-mute">Every send attempt for this project, most recent first.</p>
+      <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
+        <p className="text-[14.5px] text-mute">Every send attempt for this project, most recent first.</p>
+        <div className="inline-flex rounded-[10px] bg-surface-alt p-[3px] text-[13px] font-semibold">
+          {filters.map(({ id, label }) => (
+            <Link
+              key={id}
+              href={`/dashboard/projects/${projectId}?tab=logs${id === 'all' ? '' : `&status=${id}`}`}
+              aria-current={id === status ? 'page' : undefined}
+              className={`rounded-[7px] px-3.5 py-1.5 ${id === status ? 'bg-surface text-ink shadow-sm' : 'text-mute hover:text-ink'}`}
+            >
+              {label}
+            </Link>
+          ))}
+        </div>
+      </div>
       <div className="overflow-x-auto rounded-[14px] border border-border bg-surface">
         <div className="grid min-w-[680px] grid-cols-[1fr_1.6fr_0.9fr_1fr] gap-3 border-b border-border bg-bg px-5 py-[13px] font-mono text-[11.5px] uppercase tracking-[.06em] text-mute">
           <span>Recipient</span>
@@ -151,7 +172,7 @@ async function LogsTab({
           <span>Status</span>
           <span>Sent</span>
         </div>
-        {(logs ?? []).length === 0 && <div className="px-5 py-8 text-center text-sm text-mute">No sends yet.</div>}
+        {(logs ?? []).length === 0 && <div className="px-5 py-8 text-center text-sm text-mute">{status === 'all' ? 'No sends yet.' : `No ${status} sends.`}</div>}
         {(logs ?? []).map((log) => (
           <div key={log.id} className="grid min-w-[680px] grid-cols-[1fr_1.6fr_0.9fr_1fr] items-center gap-3 border-b border-border px-5 py-4 last:border-b-0">
             <span className="truncate font-mono text-[13px]">{log.recipient}</span>

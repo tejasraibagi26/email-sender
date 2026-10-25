@@ -1,6 +1,5 @@
-import Link from 'next/link';
 import { NewProjectButton } from '@/components/NewProjectButton';
-import { Sparkline } from '@/components/Sparkline';
+import { ProjectList } from '@/components/ProjectList';
 import { formatRelative } from '@/lib/format';
 import { createClient } from '@/lib/supabase/server';
 
@@ -113,35 +112,17 @@ export default async function DashboardPage() {
           </div>
 
           <div className="flex flex-wrap items-start gap-5">
-            <section className="min-w-0 flex-[999_1_520px]">
-              <h2 className="mb-3 text-[17px] font-semibold tracking-[-0.02em]">
-                All projects
-                <span className="ml-1.5 rounded-md bg-surface-alt px-2 py-0.5 font-mono text-xs font-normal text-mute">{withStats.length}</span>
-              </h2>
-              <div className="overflow-x-auto rounded-[14px] border border-border bg-surface">
-                <div className="min-w-[620px]">
-                  {withStats.map(({ project, stats }) => (
-                    <Link
-                      key={project.id}
-                      href={`/dashboard/projects/${project.id}`}
-                      className="grid grid-cols-[2fr_96px_0.8fr_0.8fr_0.6fr_20px] items-center gap-3 border-b border-border px-5 py-[18px] last:border-b-0 hover:bg-surface-alt"
-                    >
-                      <span className="min-w-0">
-                        <span className="block truncate text-[15.5px] font-semibold tracking-[-0.01em]">{project.name}</span>
-                        <span className="mt-0.5 block truncate font-mono text-xs text-mute">sends as &quot;{project.app_name}&quot;</span>
-                      </span>
-                      <Sparkline values={trends.get(project.id) ?? new Array<number>(TREND_DAYS).fill(0)} />
-                      <Metric value={stats.sent30d} label="sent (30d)" />
-                      <Metric value={stats.activeJobs} label="active jobs" />
-                      <Metric value={stats.keys} label="keys" />
-                      <svg aria-hidden="true" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" className="text-mute">
-                        <path d="M9 18L15 12L9 6" />
-                      </svg>
-                    </Link>
-                  ))}
-                </div>
-              </div>
-            </section>
+            <ProjectList
+              projects={withStats.map(({ project, stats }) => ({
+                id: project.id,
+                name: project.name,
+                appName: project.app_name,
+                trend: trends.get(project.id) ?? new Array<number>(TREND_DAYS).fill(0),
+                sent30d: stats.sent30d,
+                activeJobs: stats.activeJobs,
+                keys: stats.keys,
+              }))}
+            />
 
             <section className="min-w-0 flex-[1_1_300px]">
               <h2 className="mb-3 text-[17px] font-semibold tracking-[-0.02em]">Recent activity</h2>
@@ -183,14 +164,5 @@ function StatTile({ label, value, note }: { label: string; value: string; note: 
       <div className="text-[30px] font-semibold tracking-[-0.03em]">{value}</div>
       <div className="mt-0.5 text-[12.5px] text-mute">{note}</div>
     </div>
-  );
-}
-
-function Metric({ value, label }: { value: number; label: string }) {
-  return (
-    <span>
-      <span className="block text-base font-semibold">{value.toLocaleString()}</span>
-      <span className="text-xs text-mute">{label}</span>
-    </span>
   );
 }
