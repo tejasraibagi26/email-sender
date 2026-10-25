@@ -1,4 +1,5 @@
 import { createHash, randomBytes } from 'crypto';
+import { after } from 'next/server';
 import { supabaseAdmin } from './supabase/admin';
 
 const KEY_PREFIX = 'sbu_live_';
@@ -49,7 +50,11 @@ export async function authenticateApiKey(request: Request): Promise<AuthResult> 
     return { error: unauthorized() };
   }
 
-  void supabaseAdmin.from('api_keys').update({ last_used_at: new Date().toISOString() }).eq('id', key.id);
+  // Supabase query builders are lazy: they only send the request once awaited, so this
+  // must be awaited (inside after(), so it runs post-response without adding latency).
+  after(async () => {
+    await supabaseAdmin.from('api_keys').update({ last_used_at: new Date().toISOString() }).eq('id', key.id);
+  });
 
   return { project: projectRow as AuthenticatedProject };
 }
