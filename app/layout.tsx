@@ -1,26 +1,19 @@
 import type { Metadata } from 'next';
-import { Manrope, Instrument_Serif, JetBrains_Mono } from 'next/font/google';
+import { Geist, Geist_Mono } from 'next/font/google';
 import { RootProvider } from 'fumadocs-ui/provider';
 import 'fumadocs-ui/style.css';
 import './globals.css';
 
-const manrope = Manrope({
+const geist = Geist({
   subsets: ['latin'],
-  weight: ['400', '500', '600', '700', '800'],
-  variable: '--font-manrope',
+  weight: ['400', '500', '600', '700'],
+  variable: '--font-geist',
 });
 
-const instrumentSerif = Instrument_Serif({
-  subsets: ['latin'],
-  weight: '400',
-  style: ['normal', 'italic'],
-  variable: '--font-instrument-serif',
-});
-
-const jetbrainsMono = JetBrains_Mono({
+const geistMono = Geist_Mono({
   subsets: ['latin'],
   weight: ['400', '500', '600'],
-  variable: '--font-jetbrains-mono',
+  variable: '--font-geist-mono',
 });
 
 export const metadata: Metadata = {
@@ -30,9 +23,9 @@ export const metadata: Metadata = {
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en" className={`${manrope.variable} ${instrumentSerif.variable} ${jetbrainsMono.variable}`} suppressHydrationWarning>
+    <html lang="en" className={`${geist.variable} ${geistMono.variable}`} suppressHydrationWarning>
       <body className="font-sans antialiased">
-        <RootProvider theme={{ defaultTheme: 'light', enableSystem: false }}>{children}</RootProvider>
+        <RootProvider theme={{ defaultTheme: 'system', enableSystem: true }}>{children}</RootProvider>
       </body>
     </html>
   );

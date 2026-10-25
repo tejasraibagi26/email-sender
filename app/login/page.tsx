@@ -1,7 +1,9 @@
 'use client';
 
+import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useState, type FormEvent } from 'react';
+import { LogoMark } from '@/components/Logo';
 import { createClient } from '@/lib/supabase/client';
 
 export default function LoginPage() {
@@ -30,55 +32,84 @@ export default function LoginPage() {
   }
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-[radial-gradient(ellipse_900px_500px_at_50%_0%,rgb(var(--color-accent)/0.08),transparent_70%)] bg-bg">
-      <div className="w-[380px]">
-        <div className="mb-[34px] flex flex-col items-center">
-          <div className="mb-4 flex h-10 w-10 items-center justify-center rounded-[10px] bg-accent">
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#FBF3E7" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
-              <path d="M22 2L11 13" />
-              <path d="M22 2L15 22L11 13L2 9L22 2Z" />
-            </svg>
-          </div>
-          <h1 className="mb-1.5 font-serif text-[26px] italic">Sign in to Send</h1>
-          <p className="text-center text-sm text-ink/60">Access your Uplift projects and API keys.</p>
+    <div className="flex min-h-screen flex-wrap bg-bg">
+      <div className="flex min-w-0 flex-[1_1_480px] flex-col justify-between gap-12 border-b border-code-border bg-code-bg p-11 px-14 text-white">
+        <Link href="/" className="flex items-center gap-2.5">
+          <LogoMark size={32} />
+          <span className="text-[19px] font-bold tracking-[-0.02em]">Send</span>
+          <span className="mt-[3px] font-mono text-[11px] tracking-[.08em] text-[#A8B1BA]">BY UPLIFT</span>
+        </Link>
+        <div>
+          <h2 className="mb-4 max-w-[440px] text-[40px] font-semibold leading-[1.1] tracking-[-0.03em]">
+            Email infrastructure for every app you ship.
+          </h2>
+          <p className="max-w-[400px] text-base leading-[1.6] text-[#A8B1BA]">
+            Access your Uplift projects, API keys, logs and scheduled sends.
+          </p>
         </div>
+        <pre className="max-w-[440px] whitespace-pre-wrap rounded-xl border border-code-border bg-black/40 px-5 py-[18px] font-mono text-[12.5px] leading-[1.75] text-code-text">
+          <span className="text-[#8793A0]">POST</span> /api/v1/send{'\n'}
+          <span className="text-[#8FB4FF]">&quot;status&quot;</span>: <span className="text-[#6FD6A0]">&quot;sent&quot;</span>
+        </pre>
+      </div>
 
-        <form onSubmit={handleSubmit} className="rounded-2xl border border-border bg-surface p-8 shadow-[0_18px_50px_-22px_rgba(28,23,18,.18)]">
-          <div className="mb-[18px]">
-            <label className="mb-1.5 block text-[13px] font-semibold text-ink/70">Email</label>
-            <input
-              type="email"
-              required
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              placeholder="you@useuplift.live"
-              className="w-full rounded-lg border border-border bg-surface px-3.5 py-3 text-[14.5px]"
-            />
-          </div>
-          <div className="mb-2.5">
-            <label className="mb-1.5 block text-[13px] font-semibold text-ink/70">Password</label>
-            <input
-              type="password"
-              required
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              placeholder="••••••••••••"
-              className="w-full rounded-lg border border-border bg-surface px-3.5 py-3 text-[14.5px]"
-            />
-          </div>
+      <div className="flex min-w-0 flex-[1_1_480px] items-center justify-center px-8 py-12">
+        <div className="w-full max-w-[400px]">
+          <h1 className="mb-2 text-[30px] font-semibold tracking-[-0.03em]">Sign in to Send</h1>
+          <p className="mb-8 text-[15px] text-mute">Access your Uplift projects and API keys.</p>
 
-          {error && <p className="mb-3 text-[13px] text-error">{error}</p>}
+          <form onSubmit={handleSubmit} className="flex flex-col gap-[18px]">
+            <div>
+              <label htmlFor="email" className="mb-[7px] block text-[13.5px] font-semibold">
+                Email
+              </label>
+              <input
+                id="email"
+                type="email"
+                required
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                placeholder="you@useuplift.live"
+                className="w-full rounded-[10px] border border-border bg-surface px-3.5 py-[13px] text-[15px] placeholder:text-mute/70 focus:border-accent focus:outline-none focus:ring-[3px] focus:ring-accent/20"
+              />
+            </div>
+            <div>
+              <label htmlFor="password" className="mb-[7px] block text-[13.5px] font-semibold">
+                Password
+              </label>
+              <input
+                id="password"
+                type="password"
+                required
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                placeholder="••••••••••••"
+                className="w-full rounded-[10px] border border-border bg-surface px-3.5 py-[13px] text-[15px] placeholder:text-mute/70 focus:border-accent focus:outline-none focus:ring-[3px] focus:ring-accent/20"
+              />
+            </div>
 
-          <button
-            type="submit"
-            disabled={pending}
-            className="mt-[18px] w-full rounded-lg bg-accent py-3.5 text-[14.5px] font-bold text-[#FBF3E7] disabled:opacity-60"
-          >
-            {pending ? 'Signing in…' : 'Sign in'}
-          </button>
-        </form>
+            {error && (
+              <div role="alert" className="flex items-center gap-2 rounded-[10px] bg-error-soft px-[13px] py-[11px] text-[13.5px] font-medium text-error">
+                <svg aria-hidden="true" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
+                  <circle cx="12" cy="12" r="9" />
+                  <path d="M12 8V12.5" />
+                  <path d="M12 16H12.01" />
+                </svg>
+                {error}
+              </div>
+            )}
 
-        <p className="mt-[22px] text-center text-[13px] text-ink/40">Don&apos;t have access? Contact an Uplift admin.</p>
+            <button
+              type="submit"
+              disabled={pending}
+              className="w-full rounded-[10px] bg-accent py-3.5 text-[15px] font-semibold text-white hover:bg-accent-hover disabled:opacity-60"
+            >
+              {pending ? 'Signing in…' : 'Sign in'}
+            </button>
+          </form>
+
+          <p className="mt-6 text-[13.5px] text-mute">Don&apos;t have access? Contact an Uplift admin.</p>
+        </div>
       </div>
     </div>
   );

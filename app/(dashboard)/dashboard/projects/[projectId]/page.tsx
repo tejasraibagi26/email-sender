@@ -2,27 +2,12 @@ import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { NewApiKeyButton } from '@/components/NewApiKeyButton';
 import { SenderAddressForm } from '@/components/SenderAddressForm';
+import { DOMAIN } from '@/lib/emailDomain';
+import { formatDate, formatRelative } from '@/lib/format';
 import { createClient } from '@/lib/supabase/server';
 import { deleteJob, revokeApiKey, toggleJobStatus } from '../../actions';
 
 type Tab = 'keys' | 'logs' | 'jobs' | 'settings';
-
-function formatDate(value: string | null) {
-  if (!value) return 'Never';
-  return new Date(value).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
-}
-
-function formatRelative(value: string | null) {
-  if (!value) return 'Never';
-  const diffMs = Date.now() - new Date(value).getTime();
-  const mins = Math.round(diffMs / 60000);
-  if (mins < 1) return 'Just now';
-  if (mins < 60) return `${mins} min${mins === 1 ? '' : 's'} ago`;
-  const hours = Math.round(mins / 60);
-  if (hours < 24) return `${hours} hour${hours === 1 ? '' : 's'} ago`;
-  const days = Math.round(hours / 24);
-  return `${days} day${days === 1 ? '' : 's'} ago`;
-}
 
 export default async function ProjectDetailPage({
   params,
@@ -40,34 +25,45 @@ export default async function ProjectDetailPage({
   if (!project) notFound();
 
   const tabHref = (t: Tab) => `/dashboard/projects/${projectId}${t === 'keys' ? '' : `?tab=${t}`}`;
-  const tabClass = (t: Tab) =>
-    `border-b-2 pb-2.5 text-[13.5px] font-semibold ${t === tab ? 'border-accent text-ink' : 'border-transparent text-ink/60'}`;
+  const tabs: { id: Tab; label: string }[] = [
+    { id: 'keys', label: 'API Keys' },
+    { id: 'logs', label: 'Logs' },
+    { id: 'jobs', label: 'Jobs' },
+    { id: 'settings', label: 'Settings' },
+  ];
 
   return (
-    <div className="mx-auto max-w-[1120px] px-16 py-8 pb-11">
-      <div className="mb-[18px] flex items-center gap-2 text-[13px] text-ink/40">
-        <Link href="/dashboard">Projects</Link>
-        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.5}>
+    <div className="mx-auto max-w-[1200px] px-12 py-8 pb-11 max-sm:px-5">
+      <div className="mb-4 flex items-center gap-2 text-[13.5px] text-mute">
+        <Link href="/dashboard" className="hover:text-ink">
+          Projects
+        </Link>
+        <svg aria-hidden="true" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.5} strokeLinecap="round" strokeLinejoin="round">
           <path d="M9 18L15 12L9 6" />
         </svg>
         <span className="font-semibold text-ink">{project.name}</span>
       </div>
 
-      <h1 className="font-serif text-[28px]">{project.name}</h1>
+      <div className="mb-6 flex flex-wrap items-center justify-between gap-4">
+        <h1 className="text-[32px] font-semibold tracking-[-0.03em]">{project.name}</h1>
+        <span className="rounded-lg border border-border bg-surface px-3 py-1.5 font-mono text-[12.5px] text-mute">
+          {project.sender_address ?? 'noreply'}@{DOMAIN}
+        </span>
+      </div>
 
-      <div className="my-[22px] flex gap-7 border-b border-border">
-        <Link href={tabHref('keys')} className={tabClass('keys')}>
-          API Keys
-        </Link>
-        <Link href={tabHref('logs')} className={tabClass('logs')}>
-          Logs
-        </Link>
-        <Link href={tabHref('jobs')} className={tabClass('jobs')}>
-          Jobs
-        </Link>
-        <Link href={tabHref('settings')} className={tabClass('settings')}>
-          Settings
-        </Link>
+      <div className="mb-7 flex gap-7 overflow-x-auto border-b border-border">
+        {tabs.map(({ id, label }) => (
+          <Link
+            key={id}
+            href={tabHref(id)}
+            aria-current={id === tab ? 'page' : undefined}
+            className={`-mb-px whitespace-nowrap border-b-2 pb-3 text-[14.5px] ${
+              id === tab ? 'border-accent font-semibold text-ink' : 'border-transparent font-medium text-mute hover:text-ink'
+            }`}
+          >
+            {label}
+          </Link>
+        ))}
       </div>
 
       {tab === 'keys' && <KeysTab supabase={supabase} projectId={projectId} />}
@@ -94,32 +90,32 @@ async function KeysTab({
   return (
     <div>
       <div className="mb-4 flex items-center justify-between">
-        <p className="text-[13.5px] text-ink/60">Keys authenticate requests to this project only.</p>
+        <p className="text-[14.5px] text-mute">Keys authenticate requests to this project only.</p>
         <NewApiKeyButton projectId={projectId} />
       </div>
 
-      <div className="overflow-hidden rounded-xl border border-border bg-surface">
-        <div className="grid grid-cols-[2fr_1.4fr_1fr_1fr_0.6fr] gap-2 border-b border-border bg-surface-alt px-5 py-3.5 text-[11.5px] font-bold uppercase tracking-wide text-ink/40">
+      <div className="overflow-x-auto rounded-[14px] border border-border bg-surface">
+        <div className="grid min-w-[680px] grid-cols-[2fr_1.4fr_1fr_1fr_0.6fr] gap-3 border-b border-border bg-bg px-5 py-[13px] font-mono text-[11.5px] uppercase tracking-[.06em] text-mute">
           <span>Name</span>
           <span>Key</span>
           <span>Created</span>
           <span>Last used</span>
           <span />
         </div>
-        {(keys ?? []).length === 0 && <div className="px-5 py-8 text-center text-sm text-ink/40">No keys yet.</div>}
+        {(keys ?? []).length === 0 && <div className="px-5 py-8 text-center text-sm text-mute">No keys yet.</div>}
         {(keys ?? []).map((key) => (
-          <div key={key.id} className="grid grid-cols-[2fr_1.4fr_1fr_1fr_0.6fr] items-center gap-2 border-b border-border px-5 py-3.5 last:border-b-0">
-            <span className="text-sm font-semibold">{key.name}</span>
-            <span className="font-mono text-[13px] text-ink/60">{key.key_prefix}••••••••</span>
-            <span className="text-[13px] text-ink/60">{formatDate(key.created_at)}</span>
-            <span className="text-[13px] text-ink/60">{formatRelative(key.last_used_at)}</span>
+          <div key={key.id} className="grid min-w-[680px] grid-cols-[2fr_1.4fr_1fr_1fr_0.6fr] items-center gap-3 border-b border-border px-5 py-4 last:border-b-0">
+            <span className="text-[14.5px] font-semibold">{key.name}</span>
+            <span className="font-mono text-[13px] text-mute">{key.key_prefix}••••••••</span>
+            <span className="text-[13px] text-mute">{formatDate(key.created_at)}</span>
+            <span className="text-[13px] text-mute">{formatRelative(key.last_used_at)}</span>
             {key.revoked_at ? (
-              <span className="justify-self-end text-[12.5px] font-semibold text-ink/30">Revoked</span>
+              <span className="justify-self-end rounded-full bg-surface-alt px-2.5 py-1 text-xs font-semibold text-mute">Revoked</span>
             ) : (
               <form action={revokeApiKey} className="justify-self-end">
                 <input type="hidden" name="key_id" value={key.id} />
                 <input type="hidden" name="project_id" value={projectId} />
-                <button type="submit" className="text-[12.5px] font-semibold text-error">
+                <button type="submit" className="rounded-lg px-2.5 py-1.5 text-[13px] font-semibold text-error hover:bg-error-soft">
                   Revoke
                 </button>
               </form>
@@ -147,31 +143,33 @@ async function LogsTab({
 
   return (
     <div>
-      <p className="mb-4 text-[13.5px] text-ink/60">Every send attempt for this project, most recent first.</p>
-      <div className="overflow-hidden rounded-xl border border-border bg-surface">
-        <div className="grid grid-cols-[1fr_1.6fr_0.9fr_1fr] gap-2 border-b border-border bg-surface-alt px-5 py-3.5 text-[11.5px] font-bold uppercase tracking-wide text-ink/40">
+      <p className="mb-4 text-[14.5px] text-mute">Every send attempt for this project, most recent first.</p>
+      <div className="overflow-x-auto rounded-[14px] border border-border bg-surface">
+        <div className="grid min-w-[680px] grid-cols-[1fr_1.6fr_0.9fr_1fr] gap-3 border-b border-border bg-bg px-5 py-[13px] font-mono text-[11.5px] uppercase tracking-[.06em] text-mute">
           <span>Recipient</span>
           <span>Subject</span>
           <span>Status</span>
           <span>Sent</span>
         </div>
-        {(logs ?? []).length === 0 && <div className="px-5 py-8 text-center text-sm text-ink/40">No sends yet.</div>}
+        {(logs ?? []).length === 0 && <div className="px-5 py-8 text-center text-sm text-mute">No sends yet.</div>}
         {(logs ?? []).map((log) => (
-          <div key={log.id} className="grid grid-cols-[1fr_1.6fr_0.9fr_1fr] items-center gap-2 border-b border-border px-5 py-3.5 last:border-b-0">
-            <span className="truncate font-mono text-[13.5px]">{log.recipient}</span>
-            <span className="truncate text-[13.5px] text-ink/70">{log.subject}</span>
+          <div key={log.id} className="grid min-w-[680px] grid-cols-[1fr_1.6fr_0.9fr_1fr] items-center gap-3 border-b border-border px-5 py-4 last:border-b-0">
+            <span className="truncate font-mono text-[13px]">{log.recipient}</span>
+            <span className="truncate text-[13.5px] text-ink">{log.subject}</span>
             <span>
               {log.status === 'sent' ? (
-                <span className="inline-flex w-fit items-center gap-1.5 rounded-full bg-success-soft px-2.5 py-1 text-[12px] font-bold text-success">
+                <span className="inline-flex w-fit items-center gap-1.5 rounded-full bg-success-soft px-2.5 py-1 text-[12.5px] font-semibold text-success">
+                  <span className="h-1.5 w-1.5 rounded-full bg-current" />
                   Sent
                 </span>
               ) : (
-                <span className="inline-flex w-fit items-center gap-1.5 rounded-full bg-error-soft px-2.5 py-1 text-[12px] font-bold text-error" title={log.error ?? undefined}>
+                <span className="inline-flex w-fit items-center gap-1.5 rounded-full bg-error-soft px-2.5 py-1 rounded-lg px-2.5 py-1.5 text-[13px] font-semibold text-error hover:bg-error-soft" title={log.error ?? undefined}>
+                  <span className="h-1.5 w-1.5 rounded-full bg-current" />
                   Failed
                 </span>
               )}
             </span>
-            <span className="text-[13px] text-ink/60">{formatRelative(log.sent_at)}</span>
+            <span className="text-[13px] text-mute">{formatRelative(log.sent_at)}</span>
           </div>
         ))}
       </div>
@@ -194,26 +192,32 @@ async function JobsTab({
 
   return (
     <div>
-      <p className="mb-4 text-[13.5px] text-ink/60">Recurring sends, scheduled and managed per project.</p>
-      <div className="overflow-hidden rounded-xl border border-border bg-surface">
-        <div className="grid grid-cols-[1.6fr_1.2fr_1fr_0.9fr_0.9fr] gap-2 border-b border-border bg-surface-alt px-5 py-3.5 text-[11.5px] font-bold uppercase tracking-wide text-ink/40">
+      <p className="mb-4 text-[14.5px] text-mute">Recurring sends, scheduled and managed per project.</p>
+      <div className="overflow-x-auto rounded-[14px] border border-border bg-surface">
+        <div className="grid min-w-[680px] grid-cols-[1.6fr_1.2fr_1fr_0.9fr_0.9fr] gap-3 border-b border-border bg-bg px-5 py-[13px] font-mono text-[11.5px] uppercase tracking-[.06em] text-mute">
           <span>Job</span>
           <span>Recipient</span>
           <span>Next run</span>
           <span>Status</span>
           <span />
         </div>
-        {(jobs ?? []).length === 0 && <div className="px-5 py-8 text-center text-sm text-ink/40">No scheduled jobs yet.</div>}
+        {(jobs ?? []).length === 0 && <div className="px-5 py-8 text-center text-sm text-mute">No scheduled jobs yet.</div>}
         {(jobs ?? []).map((job) => (
-          <div key={job.id} className="grid grid-cols-[1.6fr_1.2fr_1fr_0.9fr_0.9fr] items-center gap-2 border-b border-border px-5 py-3.5 last:border-b-0">
+          <div key={job.id} className="grid min-w-[680px] grid-cols-[1.6fr_1.2fr_1fr_0.9fr_0.9fr] items-center gap-3 border-b border-border px-5 py-4 last:border-b-0">
             <span className="text-[13.5px] font-semibold">{job.name}</span>
-            <span className="font-mono text-[13px] text-ink/60">{job.recipient}</span>
-            <span className="text-[13px] text-ink/60">{job.next_run_at ? formatRelative(job.next_run_at) : '—'}</span>
+            <span className="font-mono text-[13px] text-mute">{job.recipient}</span>
+            <span className="text-[13px] text-mute">{job.next_run_at ? formatRelative(job.next_run_at) : '—'}</span>
             <span>
               {job.status === 'active' ? (
-                <span className="inline-flex w-fit rounded-full bg-success-soft px-2.5 py-1 text-[12px] font-bold text-success">Active</span>
+                <span className="inline-flex w-fit items-center gap-1.5 rounded-full bg-success-soft px-2.5 py-1 text-[12.5px] font-semibold text-success">
+                  <span className="h-1.5 w-1.5 rounded-full bg-current" />
+                  Active
+                </span>
               ) : (
-                <span className="inline-flex w-fit rounded-full bg-pending-soft px-2.5 py-1 text-[12px] font-bold text-pending">Paused</span>
+                <span className="inline-flex w-fit items-center gap-1.5 rounded-full bg-pending-soft px-2.5 py-1 text-[12.5px] font-semibold text-pending">
+                  <span className="h-1.5 w-1.5 rounded-full bg-current" />
+                  Paused
+                </span>
               )}
             </span>
             <div className="flex justify-end gap-3">
@@ -221,14 +225,14 @@ async function JobsTab({
                 <input type="hidden" name="job_id" value={job.id} />
                 <input type="hidden" name="project_id" value={projectId} />
                 <input type="hidden" name="next_status" value={job.status === 'active' ? 'paused' : 'active'} />
-                <button type="submit" className="text-[12.5px] font-semibold text-ink/60">
+                <button type="submit" className="rounded-lg px-2.5 py-1.5 text-[13px] font-semibold text-mute hover:text-ink">
                   {job.status === 'active' ? 'Pause' : 'Resume'}
                 </button>
               </form>
               <form action={deleteJob}>
                 <input type="hidden" name="job_id" value={job.id} />
                 <input type="hidden" name="project_id" value={projectId} />
-                <button type="submit" className="text-[12.5px] font-semibold text-error">
+                <button type="submit" className="rounded-lg px-2.5 py-1.5 text-[13px] font-semibold text-error hover:bg-error-soft">
                   Delete
                 </button>
               </form>

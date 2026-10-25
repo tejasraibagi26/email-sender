@@ -10,31 +10,48 @@ export function SenderAddressForm({ projectId, senderAddress }: { projectId: str
   const [state, formAction, pending] = useActionState(updateSenderAddress.bind(null, projectId), initialState);
 
   return (
-    <form action={formAction} className="max-w-[420px]">
-      <label className="mb-1.5 block text-[13px] font-semibold text-ink/70">Sender address</label>
-      <div className="mb-1.5 flex items-center overflow-hidden rounded-lg border border-border bg-surface">
-        <input
-          name="sender_address"
-          defaultValue={senderAddress ?? ''}
-          placeholder="noreply"
-          className="min-w-0 flex-1 px-3.5 py-3 text-[14.5px]"
-        />
-        <span className="whitespace-nowrap px-3.5 text-[13.5px] text-ink/40">@{DOMAIN}</span>
+    <form action={formAction} className="max-w-[640px] overflow-hidden rounded-2xl border border-border bg-surface">
+      <div className="px-7 pb-6 pt-7">
+        <h2 className="mb-1.5 text-lg font-semibold tracking-[-0.02em]">Sender address</h2>
+        <p className="mb-[22px] text-sm leading-[1.55] text-mute">
+          Used as the default &quot;From&quot; address for this project&apos;s emails. Leave blank to use noreply@{DOMAIN}.
+        </p>
+        <label htmlFor="sender_address" className="mb-[7px] block text-[13.5px] font-semibold">
+          Address
+        </label>
+        <div className="flex items-stretch overflow-hidden rounded-[10px] border border-border bg-surface focus-within:border-accent focus-within:ring-[3px] focus-within:ring-accent/20">
+          <input
+            id="sender_address"
+            name="sender_address"
+            defaultValue={senderAddress ?? ''}
+            placeholder="noreply"
+            className="min-w-0 flex-1 bg-transparent px-3.5 py-[13px] font-mono text-[14.5px] focus:outline-none"
+          />
+          <span className="flex items-center whitespace-nowrap border-l border-border bg-bg px-3.5 font-mono text-[13.5px] text-mute">
+            @{DOMAIN}
+          </span>
+        </div>
+
+        {state.error && (
+          <p role="alert" className="mt-4 rounded-[10px] bg-error-soft px-[13px] py-[11px] text-[13.5px] font-medium text-error">
+            {state.error}
+          </p>
+        )}
+        {state.success && (
+          <p role="status" className="mt-4 rounded-[10px] bg-success-soft px-[13px] py-[11px] text-[13.5px] font-medium text-success">
+            Saved.
+          </p>
+        )}
       </div>
-      <p className="mb-4 text-[12px] text-ink/40">
-        Used as the default &quot;From&quot; address for this project&apos;s emails. Leave blank to use noreply@{DOMAIN}.
-      </p>
-
-      {state.error && <p className="mb-4 text-[13px] text-error">{state.error}</p>}
-      {state.success && <p className="mb-4 text-[13px] text-success">Saved.</p>}
-
-      <button
-        type="submit"
-        disabled={pending}
-        className="rounded-lg bg-accent px-[18px] py-2.5 text-[13.5px] font-bold text-[#FBF3E7] disabled:opacity-60"
-      >
-        {pending ? 'Saving…' : 'Save'}
-      </button>
+      <div className="flex justify-end border-t border-border bg-bg px-7 py-4">
+        <button
+          type="submit"
+          disabled={pending}
+          className="rounded-[10px] bg-accent px-5 py-2.5 text-sm font-semibold text-white hover:bg-accent-hover disabled:opacity-60"
+        >
+          {pending ? 'Saving…' : 'Save'}
+        </button>
+      </div>
     </form>
   );
 }

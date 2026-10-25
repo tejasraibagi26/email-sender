@@ -1,7 +1,11 @@
 import Link from 'next/link';
 import { redirect } from 'next/navigation';
 import type { ReactNode } from 'react';
+import { LogoMark } from '@/components/Logo';
+import { SidebarNav } from '@/components/SidebarNav';
+import { ThemeToggle } from '@/components/ThemeToggle';
 import { createClient } from '@/lib/supabase/server';
+import { signOut } from './dashboard/actions';
 
 export default async function DashboardLayout({ children }: { children: ReactNode }) {
   const supabase = await createClient();
@@ -11,35 +15,37 @@ export default async function DashboardLayout({ children }: { children: ReactNod
 
   if (!user) redirect('/login');
 
-  const initials = (user.email ?? '?').slice(0, 2).toUpperCase();
+  const email = user.email ?? '';
+  const initials = (email || '?').slice(0, 2).toUpperCase();
 
   return (
-    <div className="flex min-h-screen flex-col bg-bg">
-      <header className="flex h-[68px] shrink-0 items-center justify-between border-b border-border px-10">
-        <div className="flex items-center gap-10">
-          <Link href="/dashboard" className="flex items-center gap-3">
-            <span className="flex h-[30px] w-[30px] items-center justify-center rounded-lg bg-accent">
-              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#FBF3E7" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
-                <path d="M22 2L11 13" />
-                <path d="M22 2L15 22L11 13L2 9L22 2Z" />
-              </svg>
-            </span>
-            <span className="font-serif text-lg italic">Send</span>
+    <div className="flex min-h-screen flex-wrap bg-bg">
+      <aside className="flex min-h-[420px] flex-[0_0_248px] flex-col justify-between gap-7 border-r border-border bg-surface px-4 py-6 max-md:min-h-0 max-md:flex-[1_1_100%] max-md:border-b max-md:border-r-0">
+        <div className="flex flex-col gap-7">
+          <Link href="/dashboard" className="flex items-center gap-2.5 px-2">
+            <LogoMark size={30} />
+            <span className="text-lg font-bold tracking-[-0.02em]">Send</span>
           </Link>
-          <nav className="flex gap-7">
-            <Link href="/dashboard" className="border-b-2 border-accent pb-2 text-[13.5px] font-semibold text-ink">
-              Dashboard
-            </Link>
-            <Link href="/docs" className="pb-2 text-[13.5px] font-semibold text-ink/60 hover:text-ink">
-              Docs
-            </Link>
-          </nav>
+          <SidebarNav />
         </div>
-        <div className="flex h-8 w-8 items-center justify-center rounded-full bg-accent-soft text-[12.5px] font-bold text-accent">
-          {initials}
+        <div className="flex flex-col gap-2.5">
+          <div className="flex items-center gap-2.5 rounded-[10px] border border-border p-2.5">
+            <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-accent-soft text-[12.5px] font-bold text-accent-text">
+              {initials}
+            </span>
+            <span className="min-w-0 flex-1">
+              <span className="block truncate text-[13px] font-semibold">{email}</span>
+              <form action={signOut}>
+                <button type="submit" className="text-xs text-mute hover:text-ink">
+                  Sign out
+                </button>
+              </form>
+            </span>
+          </div>
+          <ThemeToggle className="w-full" />
         </div>
-      </header>
-      <main className="flex-1">{children}</main>
+      </aside>
+      <main className="min-w-0 flex-[999_1_560px]">{children}</main>
     </div>
   );
 }

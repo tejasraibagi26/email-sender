@@ -18,11 +18,13 @@ const config: Config = {
         'surface-alt': 'rgb(var(--color-surface-alt) / <alpha-value>)',
         border: 'rgb(var(--color-border) / <alpha-value>)',
         ink: 'rgb(var(--color-ink) / <alpha-value>)',
+        mute: 'rgb(var(--color-mute) / <alpha-value>)',
         scrim: 'rgb(var(--color-scrim) / <alpha-value>)',
         accent: {
           DEFAULT: 'rgb(var(--color-accent) / <alpha-value>)',
           hover: 'rgb(var(--color-accent-hover) / <alpha-value>)',
           soft: 'rgb(var(--color-accent-soft) / <alpha-value>)',
+          text: 'rgb(var(--color-accent-text) / <alpha-value>)',
         },
         success: {
           DEFAULT: 'rgb(var(--color-success) / <alpha-value>)',
@@ -43,9 +45,8 @@ const config: Config = {
         },
       },
       fontFamily: {
-        sans: ['var(--font-manrope)', 'ui-sans-serif', 'system-ui', 'sans-serif'],
-        serif: ['var(--font-instrument-serif)', 'Georgia', 'serif'],
-        mono: ['var(--font-jetbrains-mono)', 'ui-monospace', 'monospace'],
+        sans: ['var(--font-geist)', 'ui-sans-serif', 'system-ui', 'sans-serif'],
+        mono: ['var(--font-geist-mono)', 'ui-monospace', 'monospace'],
       },
     },
   },
