@@ -38,8 +38,8 @@ export default async function ProjectDetailPage({
   ];
 
   return (
-    <div className="mx-auto max-w-[1200px] px-12 py-8 pb-11 max-sm:px-5">
-      <div className="mb-4 flex items-center gap-2 text-[13.5px] text-mute">
+    <div className="mx-auto flex max-w-[1200px] flex-col px-12 py-8 pb-8 max-sm:px-5 md:h-full">
+      <div className="mb-4 flex shrink-0 items-center gap-2 text-[13.5px] text-mute">
         <Link href="/dashboard" className="hover:text-ink">
           Projects
         </Link>
@@ -49,14 +49,14 @@ export default async function ProjectDetailPage({
         <span className="font-semibold text-ink">{project.name}</span>
       </div>
 
-      <div className="mb-6 flex flex-wrap items-center justify-between gap-4">
+      <div className="mb-6 flex shrink-0 flex-wrap items-center justify-between gap-4">
         <h1 className="text-[32px] font-semibold tracking-[-0.03em]">{project.name}</h1>
         <span className="rounded-lg border border-border bg-surface px-3 py-1.5 font-mono text-[12.5px] text-mute">
           {project.sender_address ?? 'noreply'}@{DOMAIN}
         </span>
       </div>
 
-      <div className="mb-7 flex gap-7 overflow-x-auto border-b border-border">
+      <div className="mb-7 flex shrink-0 gap-7 overflow-x-auto border-b border-border">
         {tabs.map(({ id, label }) => (
           <Link
             key={id}
@@ -71,10 +71,12 @@ export default async function ProjectDetailPage({
         ))}
       </div>
 
+      <div className="flex min-h-0 flex-1 flex-col">
       {tab === 'keys' && <KeysTab supabase={supabase} projectId={projectId} />}
       {tab === 'logs' && <LogsTab supabase={supabase} projectId={projectId} status={status} page={page} />}
       {tab === 'jobs' && <JobsTab supabase={supabase} projectId={projectId} />}
       {tab === 'settings' && <SenderAddressForm projectId={projectId} senderAddress={project.sender_address} />}
+      </div>
     </div>
   );
 }
@@ -160,8 +162,8 @@ async function LogsTab({
   ];
 
   return (
-    <div>
-      <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
+    <div className="flex min-h-0 flex-1 flex-col">
+      <div className="mb-4 flex shrink-0 flex-wrap items-center justify-between gap-3">
         <p className="text-[14.5px] text-mute">Every send attempt for this project, most recent first.</p>
         <div className="inline-flex rounded-[10px] bg-surface-alt p-[3px] text-[13px] font-semibold">
           {filters.map(({ id, label }) => (
@@ -176,8 +178,8 @@ async function LogsTab({
           ))}
         </div>
       </div>
-      <div className="overflow-x-auto rounded-[14px] border border-border bg-surface">
-        <div className="grid min-w-[680px] grid-cols-[1fr_1.6fr_0.9fr_1fr] gap-3 border-b border-border bg-bg px-5 py-[13px] font-mono text-[11.5px] uppercase tracking-[.06em] text-mute">
+      <div className="min-h-0 flex-1 overflow-auto rounded-[14px] border border-border bg-surface max-md:max-h-[70vh]">
+        <div className="sticky top-0 z-10 grid min-w-[680px] grid-cols-[1fr_1.6fr_0.9fr_1fr] gap-3 border-b border-border bg-bg px-5 py-[13px] font-mono text-[11.5px] uppercase tracking-[.06em] text-mute">
           <span>Recipient</span>
           <span>Subject</span>
           <span>Status</span>
@@ -207,7 +209,7 @@ async function LogsTab({
       </div>
 
       {total > 0 && (
-        <div className="mt-4 flex flex-wrap items-center justify-between gap-3 text-[13.5px] text-mute">
+        <div className="mt-4 flex shrink-0 flex-wrap items-center justify-between gap-3 text-[13.5px] text-mute">
           <span>
             {from + 1}–{from + (logs ?? []).length} of {total.toLocaleString()}
           </span>

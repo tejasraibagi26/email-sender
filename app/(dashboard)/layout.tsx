@@ -19,7 +19,7 @@ export default async function DashboardLayout({ children }: { children: ReactNod
   const initials = (email || '?').slice(0, 2).toUpperCase();
 
   return (
-    <div className="flex min-h-screen flex-wrap bg-bg">
+    <div className="flex min-h-screen flex-wrap bg-bg md:h-screen md:overflow-hidden">
       <aside className="flex min-h-[420px] flex-[0_0_248px] flex-col md:sticky md:top-0 md:h-screen md:self-start md:overflow-y-auto justify-between gap-7 border-r border-border bg-surface px-4 py-6 max-md:min-h-0 max-md:flex-[1_1_100%] max-md:border-b max-md:border-r-0">
         <div className="flex flex-col gap-7">
           <Link href="/dashboard" className="flex items-center gap-2.5 px-2">
@@ -45,7 +45,7 @@ export default async function DashboardLayout({ children }: { children: ReactNod
           <ThemeToggle className="w-full" />
         </div>
       </aside>
-      <main className="min-w-0 flex-[999_1_560px]">{children}</main>
+      <main className="min-w-0 flex-[999_1_560px] md:h-screen md:overflow-y-auto">{children}</main>
     </div>
   );
 }
